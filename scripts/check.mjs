@@ -11,7 +11,8 @@ for (const path of ['index.html','docs/index.html']) {
   for(const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const link=match[1];
     if(/^(https?:|data:|mailto:)/.test(link)) continue;
-    const [relative,fragment] = link.split('#');
+    const [pathWithQuery,fragment] = link.split('#');
+    const relative = pathWithQuery.split('?')[0];
     let target=relative ? resolve(dirname(file),relative) : file;
     const info=await stat(target).catch(()=>null);
     assert(info, `Broken local reference: ${path} -> ${link}`);

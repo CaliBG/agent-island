@@ -1,0 +1,44 @@
+/* Keep the content unscaled. Only the outer silhouette changes its geometry. */
+.demo-island.motion-ready {
+  --island-pad-x: 16px;
+  --island-pad-top: 7px;
+  --island-pad-bottom: 14px;
+  --island-closed-ratio: .6;
+  height: var(--island-max-height, 350px);
+  clip-path: inset(0 var(--cut-x, 82px) var(--cut-bottom, 311px) round 0 0 var(--island-curve, 17px) var(--island-curve, 17px));
+  contain: layout style;
+  isolation: isolate;
+}
+.demo-island.motion-ready::before { display: none; }
+.island-surface {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #070709;
+  pointer-events: none;
+}
+.motion-ready .island-trigger { position: relative; z-index: 2; }
+.motion-ready .island-trigger:focus-visible { outline-offset: -3px; }
+.motion-ready .demo-content {
+  position: absolute;
+  inset: var(--island-header-height, 39px) 0 0;
+  padding: 0;
+}
+.motion-ready .demo-view {
+  position: absolute;
+  top: var(--island-pad-top);
+  left: var(--island-pad-x);
+  right: var(--island-pad-x);
+  animation: none !important;
+}
+.motion-ready .demo-view[inert] { pointer-events: none; }
+@media (max-width: 900px) {
+  .demo-island.motion-ready { --island-closed-ratio: .65; }
+}
+@media (max-width: 600px) {
+  .demo-island.motion-ready {
+    --island-pad-x: 12px;
+    --island-pad-top: 5px;
+    --island-pad-bottom: 12px;
+  }
+}

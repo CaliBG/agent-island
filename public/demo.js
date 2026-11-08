@@ -1,3 +1,5 @@
+import {createIslandMotion} from './island-motion.js';
+
 (() => {
   const desktop = document.querySelector('.desktop-frame');
   if (!desktop) return;
@@ -22,18 +24,16 @@
   let autoStep = 0;
   const cycle = ['overview', 'approval', 'question', 'jump'];
 
-  function expand(value) {
-    island.dataset.open = String(value);
-    trigger.setAttribute('aria-expanded', String(value));
-    trigger.setAttribute('aria-label', value ? '收起灵动岛演示' : '展开灵动岛演示');
-    content.hidden = !value;
-  }
-  function showView(name) {
-    views.forEach(view => {view.hidden = view.dataset.demoView !== name;});
-    expand(true);
-  }
+  const motion = createIslandMotion({island,trigger,content,views,reducedMotion});
+  let hoverTimer;
+  let leaveTimer;
+  let pointerOpen = false;
+  function clearHover() {clearTimeout(hoverTimer);clearTimeout(leaveTimer);}
+  function expand(value) {clearHover();motion.set(value);}
+  function showView(name) {clearHover();motion.set(true,name);}
+  function focusViewAction() {motion.view.querySelector('button')?.focus({preventScroll:true});}
   function setScene(name, {open = true, manual = false} = {}) {
-    if (manual) stopAutoplay();
+    if (manual) {stopAutoplay();pointerOpen=false;}
     scene = name;
     desktop.dataset.scene = name;
     desktop.classList.remove('terminal-focused');
@@ -58,7 +58,7 @@
     timer=setTimeout(() => {setScene(cycle[autoStep % cycle.length]);autoStep++;schedule();}, 5200);
   }
   function result(title,detail,output) {
-    stopAutoplay();
+    stopAutoplay();pointerOpen=false;
     document.querySelector('#demo-result-title').textContent=title;
     document.querySelector('#demo-result-detail').textContent=detail;
     terminalOutput.textContent=output;
@@ -70,15 +70,25 @@
     setTimeout(()=>toast.classList.remove('visible'),2600);
     document.querySelector('.demo-replay').focus({preventScroll:true});
   }
-  trigger.addEventListener('click', () => {
-    stopAutoplay();
-    if (content.hidden) {showView(scene);} else {expand(false);}
+  trigger.addEventListener('click', event => {
+    stopAutoplay();clearHover();
+    // A click immediately following hover should pin the newly opened panel.
+    if(event.detail>0 && pointerOpen && motion.isOpen) {pointerOpen=false;return;}
+    pointerOpen=false;
+    if(motion.isOpen) expand(false);else showView(scene);
   });
-  island.addEventListener('pointerenter', e => {
-    if(e.pointerType==='mouse') {stopAutoplay();if(scene==='overview' && content.hidden) showView('overview');}
+  island.addEventListener('pointerenter', event => {
+    if(event.pointerType!=='mouse') return;
+    stopAutoplay();clearHover();
+    if(scene==='overview' && !motion.isOpen) {
+      hoverTimer=setTimeout(()=>{pointerOpen=true;showView('overview');},90);
+    }
   });
-  island.addEventListener('pointerleave', e => {
-    if(e.pointerType==='mouse' && scene==='overview' && !island.contains(document.activeElement)) expand(false);
+  island.addEventListener('pointerleave', event => {
+    clearHover();
+    if(event.pointerType==='mouse' && pointerOpen && !island.contains(document.activeElement)) {
+      leaveTimer=setTimeout(()=>{pointerOpen=false;expand(false);},220);
+    }
   });
   island.addEventListener('keydown', e => {
     if(e.key==='Escape') {stopAutoplay();expand(false);trigger.focus();}
@@ -86,7 +96,7 @@
   island.addEventListener('focusin',stopAutoplay);
   document.querySelector('.scene-tabs').addEventListener('focusin',stopAutoplay);
   tabs.forEach(tab=>tab.addEventListener('click',()=>setScene(tab.dataset.scene,{manual:true})));
-  document.querySelectorAll('[data-open-scene]').forEach(button=>button.addEventListener('click',()=>{setScene(button.dataset.openScene,{manual:true});const target=content.querySelector('[data-demo-view]:not([hidden]) button');target?.focus({preventScroll:true});}));
+  document.querySelectorAll('[data-open-scene]').forEach(button=>button.addEventListener('click',()=>{setScene(button.dataset.openScene,{manual:true});focusViewAction();}));
   document.querySelectorAll('[data-decision]').forEach(button=>button.addEventListener('click',()=>{
     const allow=button.dataset.decision==='allow';
     result(allow?'已允许这一次':'本次操作已拒绝',allow?'你的决定已返回给 Agent。':'Agent 会等待你的下一步指示。',allow?'✓ 已收到允许，演示流程继续。':'× 用户已拒绝，演示操作未执行。');
@@ -100,7 +110,7 @@
     document.querySelector('#scene-description').textContent='网页演示已将任务窗口置于前方；桌面应用可跳转到对应项目或终端。';
     trigger.focus({preventScroll:true});
   });
-  document.querySelector('.demo-replay').addEventListener('click',()=>{setScene(scene,{manual:true});content.querySelector('[data-demo-view]:not([hidden]) button')?.focus({preventScroll:true});});
+  document.querySelector('.demo-replay').addEventListener('click',()=>{setScene(scene,{manual:true});focusViewAction();});
   autoplayButton.addEventListener('click',()=>{autoplay=!autoplay;updateAutoplayButton();if(autoplay){autoStep=(cycle.indexOf(scene)+1)%cycle.length;schedule();}else clearTimeout(timer);});
   new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;schedule();},{threshold:.15}).observe(desktop);
   document.addEventListener('visibilitychange',schedule);
