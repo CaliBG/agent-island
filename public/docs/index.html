@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>使用文档 — Agent Island</title><meta name="description" content="Agent Island 的安装、快速体验、Node.js 与 Python 接入、审批安全和本地数据说明。"><meta name="theme-color" content="#0b100e"><link rel="canonical" href="https://calibg.github.io/agent-island/docs/"><link rel="icon" href="../assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="../styles.css"><script src="../site.js" defer></script></head><body>
+<a class="skip-link" href="#main">跳到文档内容</a><header class="header"><div class="container header-inner"><a class="brand" href="../"><img src="../assets/icon.svg" width="40" height="40" alt=""><span>Agent Island</span></a><nav class="nav" id="navigation" aria-label="主导航"><a href="../#experience">产品体验</a><a href="../#connect">通用接入</a><a href="./" aria-current="page">使用文档</a></nav><a class="nav-download" href="../#download">下载体验 <span aria-hidden="true">↗</span></a><button class="menu-toggle" aria-expanded="false" aria-controls="navigation" aria-label="展开导航"><span></span><span></span></button></div></header>
+<div class="container docs-layout"><aside class="docs-sidebar" aria-label="文档目录"><p class="eyebrow">GETTING STARTED</p><a href="#install">安装与打开</a><a href="#demo">第一次体验</a><a href="#quickstart">接入你的 Agent</a><a href="#approvals">审批与问答</a><a href="#capabilities">当前支持范围</a><a href="#privacy">数据与隐私</a><a href="#troubleshooting">常见问题</a><a href="./protocol.md">完整 HTTP 协议 ↗</a></aside>
+<main class="docs-content" id="main"><p class="eyebrow">AGENT ISLAND / DOCUMENTATION</p><h1>从这里，开始登岛。</h1><p class="docs-lead">安装应用，体验小岛，再把你自己的 Agent 接进来。<br>适用于 v0.1.0 预览版。</p>
+<section id="install"><h2>安装与打开</h2><p>应用本身不需要 Node.js 或 Python。只有运行对应语言的 SDK 示例时，才需要 Node.js 20+ 或 Python 3.9+。</p><h3>macOS · Apple Silicon</h3><ol><li>从<a href="../#download">下载页面</a>获取 DMG，打开后将 Agent Island 拖入 Applications（应用程序）。</li><li>从应用程序中启动 Agent Island。你也可以下载 ZIP，解压后打开其中的应用。</li><li>当前提供 M 系列芯片版本，尚未提供 Intel 安装包。</li></ol><h3>Windows · x64</h3><ol><li>下载 EXE 安装程序，按提示安装并打开。</li><li>也可以下载 ZIP 便携版，完整解压后运行 <code>Agent Island.exe</code>。请保留同目录内的其他文件。</li></ol><div class="doc-note"><p>当前是未签名的预览版，尚未完成 Apple Developer ID 公证或 Windows Authenticode 签名。首次打开可能出现系统来源提示，请先确认下载地址和<a href="../download-checksums.txt">文件校验信息</a>。Mac 已完成自动化验证，Windows 安装包已构建，尚待实机验证。</p></div><p>应用常驻菜单栏或系统托盘。关闭管理窗口不会退出应用；如需完全退出，请使用托盘菜单中的「退出」。</p></section>
+<section class="doc-section" id="demo"><h2>第一次体验</h2><ol><li>打开管理窗口，点击「体验演示」。</li><li>将鼠标移到屏幕顶部的小岛上，查看展开的会话列表。</li><li>点击等待回应的会话，试试审批、回答问题与审阅计划。</li><li>体验后点击「退出演示」。演示不会执行命令、修改项目或调用 AI 服务。</li></ol><p>演示中的 Claude Code、Codex 等工具名称仅用于说明界面，不代表它们已经自动连接。</p><div class="table-scroll"><table><thead><tr><th>操作</th><th>macOS</th><th>Windows</th></tr></thead><tbody><tr><td>唤起小岛</td><td>Cmd + Shift + Space</td><td>Ctrl + Shift + Space</td></tr><tr><td>展开 / 收起</td><td colspan="2">鼠标悬停，或使用快捷键</td></tr><tr><td>切换显示器与外观</td><td colspan="2">管理窗口 → 偏好设置</td></tr></tbody></table></div></section>
+<section class="doc-section" id="quickstart"><h2>接入你的 Agent</h2><p>先启动 Agent Island，再把 SDK 文件复制到你自己的项目。SDK 会读取当前用户目录下的本机连接信息，向应用报告状态。无需第三方依赖，也不需要填写 AI 服务密钥。</p><div class="doc-downloads"><a class="button" href="../sdk/agent-island.mjs" download>下载 Node.js SDK ↓</a><a class="button" href="../sdk/agent_island.py" download>下载 Python SDK ↓</a><a class="button" href="../sdk/example.mjs" download>下载完整 Node.js 示例 ↓</a></div><h3>Node.js</h3><p>将以下代码保存为 <code>demo.mjs</code>，与 <code>agent-island.mjs</code> 放在同一个目录，然后运行 <code>node demo.mjs</code>。</p><pre><code>import { AgentIsland } from './agent-island.mjs';
+
+const island = new AgentIsland({
+  agent: 'My Agent', title: '整理项目文档'
+});
+
+await island.start('正在读取项目…');
+await island.tool('Read', '检查 README.md');
+await island.complete('文档整理完成');</code></pre><h3>Python</h3><p>将以下代码保存为 <code>demo.py</code>，与 <code>agent_island.py</code> 放在同一目录。运行 <code>python3 demo.py</code>（Windows 也可用 <code>py demo.py</code>）。</p><pre><code>from agent_island import AgentIsland
+
+island = AgentIsland(
+    agent="My Agent", title="整理项目文档"
+)
+
+island.start("正在读取项目…")
+island.send("tool.start", tool="Read",
+            content="检查 README.md")
+island.complete("文档整理完成")</code></pre><h3>本地 HTTP 接口</h3><p>应用在 <code>~/.agent-island/connection.json</code> 中写入端点和令牌。Windows 中 <code>~</code> 指当前用户目录。默认端口为 24678；如被占用，会自动选择空闲端口。SDK 每次请求重新读取连接文件。</p><p>其他语言可通过 <code>POST /v1/events</code> 发送事件，请携带 <code>Authorization: Bearer &lt;token&gt;</code>。完整事件结构见<a href="./protocol.md">本地 HTTP 协议</a>。</p></section>
+<section class="doc-section" id="approvals"><h2>审批与问答</h2><p>你可以将操作的命令、说明及 diff 提交到小岛，等待用户决定。SDK 只传递状态与反馈，不会代替你执行操作。</p><pre><code>const result = await island.approve({
+  title: '请确认本次操作',
+  command: 'echo "Hello from Agent Island"',
+  content: '仅展示操作预览，本示例不会执行命令。'
+});
+
+if (result.decision === 'allow') {
+  await island.complete('用户已确认。');
+} else {
+  await island.complete('操作未获批准。');
+}</code></pre><p>审批最多等待约 10 分钟。超时、断线、会话结束、应用退出或重启，都不会自动批准。接入方必须把错误与 <code>cancel</code> 视为未批准，不应在捕获异常后继续执行待确认操作。</p><p>Node.js SDK 还提供 <code>ask()</code>（单选、多选、自定义回答）、<code>plan()</code>（计划与反馈）和 <code>usage()</code>（真实上报的用量）。可下载完整示例体验双向交互。Python 可用 <code>send()</code> 发送协议定义的其他事件。</p></section>
+<section class="doc-section" id="capabilities"><h2>当前支持范围</h2><div class="table-scroll"><table><thead><tr><th>功能</th><th>v0.1.0 状态</th></tr></thead><tbody><tr><td>桌面小岛、悬停、快捷键、多显示器</td><td>已提供</td></tr><tr><td>会话搜索、筛选、活动记录、归档</td><td>已提供</td></tr><tr><td>审批、问答、计划审阅、用量上报</td><td>已提供</td></tr><tr><td>Node.js / Python / HTTP 通用接入</td><td>已提供</td></tr><tr><td>Claude Code、Codex、Gemini CLI、Cursor 专用自动适配</td><td>后续扩展</td></tr><tr><td>厂商账户额度自动采集、SSH、手机推送、自动更新</td><td>未提供</td></tr></tbody></table></div><p>应用采用 Electron + React，使用顶部浮动窗口，不依赖物理刘海。Agent Island 为独立实现，不是 Vibe Island 的官方版本。</p></section>
+<section class="doc-section" id="privacy"><h2>数据与隐私</h2><p>桌面应用的桥接服务只监听 <code>127.0.0.1</code>，不向局域网开放。请求需通过本机令牌验证，并拒绝携带浏览器 Origin 的请求。不要公开或分享 <code>connection.json</code>。</p><p>会话文本与操作预览保存在 <code>~/.agent-island/state.json</code>。记录默认保留 7 天，下次启动时清理过期记录；演示内容不写入历史。在偏好设置中可打开数据目录。</p><p>Agent Island 不设置外部云服务或遥测。你所接入的 AI 工具可能有自己的网络行为与数据策略，请以对应工具的设置为准。</p><p>本官网不嵌入分析追踪器，也不设置账户系统。网页由 GitHub Pages 托管，安装包通过 GitHub Releases 分发；访问与下载产生的基础服务日志由 GitHub 按其<a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">隐私声明</a>处理。</p></section>
+<section class="doc-section" id="troubleshooting"><h2>常见问题</h2><h3>示例提示找不到 connection.json</h3><p>先打开 Agent Island，确认「工具接入」显示本地连接正常。SDK 和应用需要在同一台电脑、同一用户下运行。自定义数据路径时，可使用 <code>AGENT_ISLAND_HOME</code> 指向相应目录。</p><h3>小岛没有显示在预期位置</h3><p>使用快捷键唤起，或从托盘菜单打开管理窗口，检查偏好设置中的显示器与浮动方式。显示器断开后，应用会回退到可用屏幕。</p><h3>无法跳回终端</h3><p>macOS 首次定位 Terminal / iTerm2 会话可能需要系统自动化权限。Windows 在管理员窗口或某些全屏应用下可能拒绝切换焦点。若无法定位会话，可先从工具界面打开对应项目目录。</p><h3>发现其他问题</h3><p>请通过 <a href="https://github.com/CaliBG/agent-island/issues">GitHub Issues</a> 描述操作系统、应用版本与复现步骤。提交截图或日志前，请移除连接令牌、个人路径和项目敏感内容。</p></section>
+<div class="docs-footer">Agent Island v0.1.0 · <a href="../">返回官网</a> · <a href="https://github.com/CaliBG/agent-island/releases/tag/v0.1.0">查看发布记录</a></div></main></div>
+</body></html>
