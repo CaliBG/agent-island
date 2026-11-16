@@ -23,5 +23,7 @@ for (const path of ['index.html','docs/index.html']) {
     }
   }
 }
-for(const asset of ['island-expanded.png','island-collapsed.png','sessions.png','plan.png','settings.png','social.png']) assert((await stat(resolve(root,'assets',asset))).size>0);
+for(const asset of ['island-expanded.png','island-collapsed.png','sessions.png','settings.png','social.png']) assert((await stat(resolve(root,'assets',asset))).size>0);
 console.log('PASS: page metadata, duplicate IDs, local links, fragments and required images');
+
+assert(!(await readFile(resolve(root,"index.html"),"utf8")).includes("demo-island"),"No simulated island");

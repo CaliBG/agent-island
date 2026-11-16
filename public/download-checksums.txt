@@ -1,4 +1,2 @@
-4da80acff4e14c5933ab34dbb145e53d9a5111a4cc0659173542b876ccf838aa  Agent-Island-0.2.0-mac-arm64.dmg
-41dfa805e94f463685ab15193d3c0d694acc77fcd5bf2ffd606bd5e23e6ee1a6  Agent-Island-0.2.0-mac-arm64.zip
-157bfeafa1511a826eb54735244e2ecb04110ed3828cabb452d939ed1a0d8223  Agent-Island-0.2.0-win-x64.exe
-4c904ea4b15242a1a8d8dd44958738658e1ad44503ce8ee992b4aeb4209de5e9  Agent-Island-0.2.0-win-x64.zip
+207075ed82ab22a336e52358a3726708b2f17bd49732684bd3d108f85158e4ca  Agent-Island-0.2.2-mac-arm64.dmg
+581e7ebfa3f4981c83d6b8fa932fcef650f1b89a8bf73698ce95315e5cc988b4  Agent-Island-0.2.2-win-x64.exe

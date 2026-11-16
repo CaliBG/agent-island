@@ -15,18 +15,8 @@ $$('.nav a').forEach(link => link.addEventListener('click', () => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {menu.click();menu.focus();}
 });
-const preview = $('.island-preview');
-preview?.addEventListener('click', () => {
-  const expanded = preview.getAttribute('aria-expanded') !== 'true';
-  preview.setAttribute('aria-expanded', String(expanded));
-  preview.setAttribute('aria-label', expanded ? '收起灵动岛演示' : '展开灵动岛演示');
-  $('#island-image').src = expanded ? './assets/island-expanded.png' : './assets/island-collapsed.png';
-  $('#island-image').alt = expanded ? 'Agent Island 灵动岛真实截图：任务进度与等待回应的请求' : 'Agent Island 收起状态真实截图';
-  $('.visual-bottomline .mono').textContent = expanded ? '01 / 02' : '02 / 02';
-});
 const views = {
   sessions: {image:'sessions.png',text:'查看所有会话的状态，在确认前看清命令与代码变更。',alt:'会话与审批界面：左侧管理任务，右侧预览命令变更并允许或拒绝'},
-  plan: {image:'plan.png',text:'先看清执行计划，再决定是继续推进，还是给出新的方向。',alt:'计划审阅真实界面：展示 Markdown 计划，并提供批准与反馈操作'},
   settings: {image:'settings.png',text:'事件提示音、音量、逐项开关与安静时段，让提醒保持恰到好处。',alt:'偏好设置真实界面：8-bit 事件提示音、音量控制与安静时段'}
 };
 function selectView(name) {
