@@ -1,7 +1,7 @@
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
-const root = resolve('public');
+const root = resolve('dist');
 for (const path of ['index.html','docs/index.html']) {
   const file = resolve(root,path), html = await readFile(file,'utf8');
   assert.match(html, /<html lang="zh-CN">/);

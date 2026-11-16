@@ -1,52 +1,35 @@
 # Agent Island 官网
 
-中文产品官网、安装指引与通用 SDK 文档。
+白色与亮蓝色的中文官网、安装指引与通用 SDK 文档。
 
 - 官网：https://calibg.github.io/agent-island/
-- 下载：https://github.com/CaliBG/agent-island/releases
-- 网站使用原生 HTML、CSS、JavaScript，无运行时第三方依赖和追踪脚本。
-- 应用截图来自 v0.1.0 实际界面，截图含演示数据。
-- 本仓库包含网站与通用 SDK；不包含桌面应用的完整源代码。
+- 安装包：https://github.com/CaliBG/agent-island/releases
+- 静态 HTML/CSS/JavaScript，下载按钮使用 React、Tailwind CSS 与 Lucide。
+- 实际软件截图与 CSS 样机；没有虚构任务交互或追踪脚本。
+- 仅包含网站和通用 SDK，不包含桌面软件完整源代码。
 
-## 本地预览
+## 开发与发布
 
-需要 Node.js 22 或更高版本，无需安装 npm 依赖。
+Node.js 22.12+。
 
 ```sh
+npm ci
+npm run build
+npm run check
 npm run dev
 ```
 
-打开 http://127.0.0.1:4173/agent-island/ 。
+预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。
 
-```sh
-npm run check
-npm run build
-```
-
-静态产物位于 `dist/`。推送 `main` 后由 GitHub Actions 自动发布到 GitHub Pages。安装包通过 Releases 提供，不存入网站 Git 历史。
+按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。透视文字支持暂停及系统减少动态效果偏好。界面标签页支持键盘导航。
 
 ## 更新版本
 
-1. 上传新版本的安装包至 GitHub Release。
-2. 修改 `public/index.html` 的下载链接、版本号和说明。
-3. 同步 `public/docs/index.html` 与 SDK、校验文件。
-4. 运行检查，提交并推送。Pages 工作流完成后验证线上链接。
+1. 构建并测试安装包，将二进制与 SHA256SUMS.txt 上传 GitHub Release。
+2. 确认服务器文件摘要，发布 Release。
+3. 更新首页链接、文档版本和 public/download-checksums.txt。
+4. 构建、检查并推送；确认 Pages 部署和公开下载正常。
 
-## 当前产品范围
+v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登录启动和启动检查设置。Codex 首次信任由用户完成。Windows 已跨平台构建，实机待验证；安装包尚未签名。
 
-v0.1.0 提供桌面小岛、会话管理、审批问答、计划审阅和本地通用接入。各 AI 工具的专用自动适配将后续扩展。安装包未签名；macOS 已完成自动化验证，Windows 实机行为仍待验证。
-
-## 网页交互演示
-
-首页包含总览、审批、问答与跳回会话四种交互演示。所有操作仅改变网页演示状态，不执行命令或连接本地应用。支持自动演示、手动暂停、键盘切换，并尊重系统的减少动态效果偏好。
-
-英文字体使用 [Departure Mono](https://github.com/rektdeckard/departure-mono)，遵循 SIL Open Font License，许可见 `public/assets/departure-mono-LICENSE.txt`。字体文件随站点托管，不请求第三方字体服务。
-
-
-## v0.2 / 官网 v4
-
-- Mac 刘海与 Windows 屏幕顶部双平台交互演示。
-- 调整面板字体、行距、颜色、代码变更与按钮反馈。
-- 与桌面端共用事件提示音引擎；网页默认静音、主动点击后播放。
-- 更新 v0.2 真实桌面截图与下载。Mac 原生刘海定位、Force Touch 触感入口；Windows 构建仍待实机验证。
-- 校验：`npm run check`、`artifacts/motion-qa.mjs`、`artifacts/v4-qa.mjs`。
+第三方组件与字体许可见 THIRD_PARTY_NOTICES.md。

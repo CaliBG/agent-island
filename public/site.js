@@ -16,8 +16,9 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {menu.click();menu.focus();}
 });
 const views = {
-  sessions: {image:'sessions.png',text:'查看所有会话的状态，在确认前看清命令与代码变更。',alt:'会话与审批界面：左侧管理任务，右侧预览命令变更并允许或拒绝'},
-  settings: {image:'settings.png',text:'事件提示音、音量、逐项开关与安静时段，让提醒保持恰到好处。',alt:'偏好设置真实界面：8-bit 事件提示音、音量控制与安静时段'}
+ sessions:{image:'sessions.png',text:'每个会话，各有位置。',alt:'Agent Island 真实会话管理界面'},
+ integrations:{image:'setup-assistant.png',text:'连接与启动设置，一处完成。',alt:'Agent Island 接入助手实际界面'},
+ settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'Agent Island 偏好设置真实界面'}
 };
 function selectView(name) {
   const view = views[name];
@@ -87,3 +88,11 @@ $('.copy-button')?.addEventListener('click', async () => {
   try {await navigator.clipboard.writeText(examples[language]);notify('代码已复制');}
   catch {const range=document.createRange();range.selectNodeContents($('#sample-code'));const selection=getSelection();selection.removeAllRanges();selection.addRange(range);notify('已选中代码，请按 Ctrl / ⌘ + C 复制');}
 });
+
+const story=document.querySelector('.focus-story');
+const crawlButton=document.querySelector('#crawl-toggle');
+if(story&&crawlButton){
+ const observer=new IntersectionObserver(entries=>{for(const entry of entries)story.classList.toggle('is-visible',entry.isIntersecting);},{threshold:.15});observer.observe(story);
+ crawlButton.addEventListener('click',()=>{const paused=story.classList.toggle('is-paused');crawlButton.setAttribute('aria-pressed',String(paused));crawlButton.textContent=paused?'继续动效 ▷':'暂停动效 Ⅱ';});
+ document.addEventListener('visibilitychange',()=>{story.classList.toggle('is-visible',!document.hidden&&story.getBoundingClientRect().bottom>0&&story.getBoundingClientRect().top<innerHeight);});
+}
