@@ -51,8 +51,8 @@ export function createIslandMotion({island, trigger, content, views, reducedMoti
     previousTime = time;
     const steps = Math.ceil(dt/(1/120));
     const h = dt/steps;
-    const stiffness = open ? 290 : 350;
-    const damping = open ? 29 : 36;
+    const stiffness = open ? 650 : 850;
+    const damping = open ? 45 : 54;
     for (let step=0; step<steps; step++) {
       for (const axis of ['width','height']) {
         velocity[axis] += ((target[axis]-position[axis])*stiffness - velocity[axis]*damping)*h;
@@ -108,7 +108,7 @@ export function createIslandMotion({island, trigger, content, views, reducedMoti
       const animation=view.animate([
         {opacity:fromOpacity,transform:fromOpacity>0?fromTransform:`translateY(${opening?7:9}px)`},
         {opacity:active?1:0,transform:active?'translateY(0px)':'translateY(-5px)'}
-      ],{duration:active?260:150,delay:active&&opening&&fromOpacity===0?65:0,easing:'cubic-bezier(.22,1,.36,1)',fill:'both'});
+      ],{duration:active?180:100,delay:0,easing:'cubic-bezier(.22,1,.36,1)',fill:'both'});
       layerAnimations.set(view,animation);
       animation.finished.then(()=>{
         if(revision!==generation || layerAnimations.get(view)!==animation) return;

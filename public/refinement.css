@@ -99,3 +99,7 @@
 [data-platform=windows] .desktop-dock {bottom:0;left:0;right:0;transform:none;width:100%;border-radius:0;border-width:1px 0 0;justify-content:center;background:#121c37a8;padding:8px}
 [data-platform=windows] .desktop-demo-label {bottom:65px}
 @media(max-width:600px){.platform-preview{flex-direction:column;align-items:flex-start;gap:9px;margin-bottom:12px}.platform-preview button{font-size:9px;padding:7px 9px}.platform-preview>span{font-size:9px}.hardware-cutout{width:95px;height:24px}}
+/* The compact Mac silhouette ends exactly at the demo's menu-bar baseline. */
+[data-platform=mac] .island-trigger {height:29px}
+[data-platform=windows] .island-trigger {height:36px}
+@media(max-width:600px){[data-platform=mac] .island-trigger{height:29px}}

@@ -87,23 +87,17 @@ import {createIslandMotion} from './island-motion.js';
   }
   trigger.addEventListener('click', event => {
     stopAutoplay();clearHover();
-    // A click immediately following hover should pin the newly opened panel.
-    if(event.detail>0 && pointerOpen && motion.isOpen) {pointerOpen=false;return;}
     pointerOpen=false;
     if(motion.isOpen) expand(false);else showView(scene);
   });
   island.addEventListener('pointerenter', event => {
     if(event.pointerType!=='mouse') return;
     stopAutoplay();clearHover();
-    if(scene==='overview' && !motion.isOpen) {
-      hoverTimer=setTimeout(()=>{pointerOpen=true;showView('overview');},120);
-    }
+    if(!motion.isOpen) {pointerOpen=true;showView(motion.view.dataset.demoView);}
   });
   island.addEventListener('pointerleave', event => {
     clearHover();
-    if(event.pointerType==='mouse' && pointerOpen && !island.contains(document.activeElement)) {
-      leaveTimer=setTimeout(()=>{pointerOpen=false;expand(false);},450);
-    }
+    if(event.pointerType==='mouse') {pointerOpen=false;expand(false);}
   });
   island.addEventListener('keydown', e => {
     if(e.key==='Escape') {stopAutoplay();expand(false);trigger.focus();}
