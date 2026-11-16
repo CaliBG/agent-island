@@ -41,3 +41,12 @@ v0.1.0 提供桌面小岛、会话管理、审批问答、计划审阅和本地�
 首页包含总览、审批、问答与跳回会话四种交互演示。所有操作仅改变网页演示状态，不执行命令或连接本地应用。支持自动演示、手动暂停、键盘切换，并尊重系统的减少动态效果偏好。
 
 英文字体使用 [Departure Mono](https://github.com/rektdeckard/departure-mono)，遵循 SIL Open Font License，许可见 `public/assets/departure-mono-LICENSE.txt`。字体文件随站点托管，不请求第三方字体服务。
+
+
+## v0.2 / 官网 v4
+
+- Mac 刘海与 Windows 屏幕顶部双平台交互演示。
+- 调整面板字体、行距、颜色、代码变更与按钮反馈。
+- 与桌面端共用事件提示音引擎；网页默认静音、主动点击后播放。
+- 更新 v0.2 真实桌面截图与下载。Mac 原生刘海定位、Force Touch 触感入口；Windows 构建仍待实机验证。
+- 校验：`npm run check`、`artifacts/motion-qa.mjs`、`artifacts/v4-qa.mjs`。

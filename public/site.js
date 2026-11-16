@@ -27,7 +27,7 @@ preview?.addEventListener('click', () => {
 const views = {
   sessions: {image:'sessions.png',text:'查看所有会话的状态，在确认前看清命令与代码变更。',alt:'会话与审批界面：左侧管理任务，右侧预览命令变更并允许或拒绝'},
   plan: {image:'plan.png',text:'先看清执行计划，再决定是继续推进，还是给出新的方向。',alt:'计划审阅真实界面：展示 Markdown 计划，并提供批准与反馈操作'},
-  settings: {image:'settings.png',text:'显示器、浮动方式、透明度与通知提醒，按你的工作习惯设置。',alt:'偏好设置真实界面：显示器、浮动模式、透明度与系统通知设置'}
+  settings: {image:'settings.png',text:'事件提示音、音量、逐项开关与安静时段，让提醒保持恰到好处。',alt:'偏好设置真实界面：8-bit 事件提示音、音量控制与安静时段'}
 };
 function selectView(name) {
   const view = views[name];

@@ -1,8 +1,14 @@
+import {IslandSound,SOUND_EVENTS} from './sound-engine.js';
 import {createIslandMotion} from './island-motion.js';
 
 (() => {
   const desktop = document.querySelector('.desktop-frame');
   if (!desktop) return;
+  document.querySelectorAll('[data-platform-choice]').forEach(button=>button.addEventListener('click',()=>{
+    desktop.dataset.platform=button.dataset.platformChoice;
+    document.querySelectorAll('[data-platform-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+    document.querySelector('#platform-explanation').textContent=button.dataset.platformChoice==='mac'?'从刘海两侧触发，向下展开。':'固定在屏幕顶部中央，原位展开与回应。';
+  }));
   const island = document.querySelector('#demo-island');
   const trigger = document.querySelector('.island-trigger');
   const content = document.querySelector('#demo-content');
@@ -17,6 +23,14 @@ import {createIslandMotion} from './island-motion.js';
     question: ['一个问题，一次轻快回应。','直接选择发布环境，答案即刻回到当前任务。'],
     jump: ['任务结束，回到熟悉的窗口。','点击「跳回会话」，把任务窗口带回眼前。']
   };
+  const sound=new IslandSound();
+  const soundToggle=document.querySelector('.sound-toggle');
+  const volume=document.querySelector('.demo-volume input');
+  let soundEnabled=false;
+  const play=(name,preview=false)=>{if(soundEnabled||preview)sound.play(name,{volume:Number(volume.value),preview}).catch(()=>{document.querySelector('.sound-status').textContent='浏览器未能播放声音，请再次点击试听。';});};
+  soundToggle.addEventListener('click',()=>{soundEnabled=!soundEnabled;soundToggle.setAttribute('aria-pressed',String(soundEnabled));soundToggle.innerHTML=soundEnabled?'演示声音已开启 <span aria-hidden="true">−</span>':'开启演示声音 <span aria-hidden="true">＋</span>';if(soundEnabled)play('open',true);else sound.stop();});
+  volume.addEventListener('input',()=>{document.querySelector('.demo-volume output').textContent=volume.value+'%';});
+  document.querySelectorAll('[data-sound]').forEach(button=>button.addEventListener('click',()=>{const name=button.dataset.sound;play(name,true);document.querySelector('.sound-status').textContent='正在试听：'+SOUND_EVENTS[name].label;button.classList.add('playing');setTimeout(()=>button.classList.remove('playing'),500);}));
   let scene = 'overview';
   let autoplay = !reducedMotion.matches;
   let visible = false;
@@ -29,8 +43,8 @@ import {createIslandMotion} from './island-motion.js';
   let leaveTimer;
   let pointerOpen = false;
   function clearHover() {clearTimeout(hoverTimer);clearTimeout(leaveTimer);}
-  function expand(value) {clearHover();motion.set(value);}
-  function showView(name) {clearHover();motion.set(true,name);}
+  function expand(value) {clearHover();if(value!==motion.isOpen)play(value?'open':'close');motion.set(value);}
+  function showView(name) {clearHover();if(!motion.isOpen)play('open');motion.set(true,name);}
   function focusViewAction() {motion.view.querySelector('button')?.focus({preventScroll:true});}
   function setScene(name, {open = true, manual = false} = {}) {
     if (manual) {stopAutoplay();pointerOpen=false;}
@@ -46,6 +60,7 @@ import {createIslandMotion} from './island-motion.js';
     terminalOutput.classList.remove('is-denied');
     showView(name);
     if (!open) expand(false);
+    if(manual)play(name==='jump'?'complete':name==='overview'?'start':'attention');
   }
   function updateAutoplayButton() {
     autoplayButton.setAttribute('aria-pressed',String(autoplay));
@@ -81,13 +96,13 @@ import {createIslandMotion} from './island-motion.js';
     if(event.pointerType!=='mouse') return;
     stopAutoplay();clearHover();
     if(scene==='overview' && !motion.isOpen) {
-      hoverTimer=setTimeout(()=>{pointerOpen=true;showView('overview');},90);
+      hoverTimer=setTimeout(()=>{pointerOpen=true;showView('overview');},120);
     }
   });
   island.addEventListener('pointerleave', event => {
     clearHover();
     if(event.pointerType==='mouse' && pointerOpen && !island.contains(document.activeElement)) {
-      leaveTimer=setTimeout(()=>{pointerOpen=false;expand(false);},220);
+      leaveTimer=setTimeout(()=>{pointerOpen=false;expand(false);},450);
     }
   });
   island.addEventListener('keydown', e => {
@@ -98,11 +113,11 @@ import {createIslandMotion} from './island-motion.js';
   tabs.forEach(tab=>tab.addEventListener('click',()=>setScene(tab.dataset.scene,{manual:true})));
   document.querySelectorAll('[data-open-scene]').forEach(button=>button.addEventListener('click',()=>{setScene(button.dataset.openScene,{manual:true});focusViewAction();}));
   document.querySelectorAll('[data-decision]').forEach(button=>button.addEventListener('click',()=>{
-    const allow=button.dataset.decision==='allow';
+    const allow=button.dataset.decision==='allow';play(allow?'allow':'deny');
     result(allow?'已允许这一次':'本次操作已拒绝',allow?'你的决定已返回给 Agent。':'Agent 会等待你的下一步指示。',allow?'✓ 已收到允许，演示流程继续。':'× 用户已拒绝，演示操作未执行。');
     terminalOutput.classList.toggle('is-denied',!allow);
   }));
-  document.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>result('回答已送达','已选择：'+button.dataset.answer,'✓ 已收到回答：'+button.dataset.answer)));
+  document.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>{play('allow');result('回答已送达','已选择：'+button.dataset.answer,'✓ 已收到回答：'+button.dataset.answer);}));
   document.querySelector('.jump-terminal').addEventListener('click',()=>{
     stopAutoplay();expand(false);desktop.classList.add('terminal-focused');
     terminalOutput.textContent='✓ 已回到当前任务。继续你的工作。';
@@ -113,7 +128,7 @@ import {createIslandMotion} from './island-motion.js';
   document.querySelector('.demo-replay').addEventListener('click',()=>{setScene(scene,{manual:true});focusViewAction();});
   autoplayButton.addEventListener('click',()=>{autoplay=!autoplay;updateAutoplayButton();if(autoplay){autoStep=(cycle.indexOf(scene)+1)%cycle.length;schedule();}else clearTimeout(timer);});
   new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;schedule();},{threshold:.15}).observe(desktop);
-  document.addEventListener('visibilitychange',schedule);
+  document.addEventListener('visibilitychange',()=>{schedule();if(document.hidden)sound.stop();});
   reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)stopAutoplay();});
   updateAutoplayButton();
 
