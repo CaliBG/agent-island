@@ -16,9 +16,9 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {menu.click();menu.focus();}
 });
 const views = {
- sessions:{image:'sessions.png',text:'每个会话，各有位置。',alt:'Agent Island 真实会话管理界面'},
+ sessions:{image:'sessions.png',text:'每个 Agent 一个位置，展开查看会话分支。',alt:'Agent Island 真实会话管理界面'},
  integrations:{image:'setup-assistant.png',text:'连接与启动设置，一处完成。',alt:'Agent Island 接入助手实际界面'},
- settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'Agent Island 偏好设置真实界面'}
+ settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'Agent Island 偏好设置软件界面'}
 };
 function selectView(name) {
   const view = views[name];

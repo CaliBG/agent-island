@@ -1,2 +1,4 @@
-78f3551db1263af43e91083558b8cf45ab4a9e90c126014a3c594beac9b00da1  Agent-Island-0.2.4-mac-arm64.dmg
-2716c2d17de44f30c9d28ae1ba16a531e901980ec13d5ff769656a33de074473  Agent-Island-0.2.4-win-x64.exe
+89add5c4f0ff45f87556a8b60f74bf57c5a27bc90c838c8b55e2f182aa3b54e7  Agent-Island-0.3.0-mac-arm64.dmg
+6aaee3b62bee3dbdffaf2c076afbbf0cd9f74fce62b54d20c288e2b58a861c63  Agent-Island-0.3.0-win-x64.exe
+64074d33a034348055907e61bd8d1cb0ce5cc97d169f745bc9ab61c47431d1af  Agent-Island-Mobile-0.1.0-android.apk
+bd586f19272aae0b7ac9e4ca7b108419309a0cf02656067e858a986ebf3973fc  Agent-Island-Sync-0.1.0.zip
