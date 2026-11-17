@@ -16,14 +16,14 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {menu.click();menu.focus();}
 });
 const views = {
- sessions:{image:'sessions.png',text:'每个 Agent 一个位置，展开查看会话分支。',alt:'Agent Island 真实会话管理界面'},
- integrations:{image:'integrations.png',text:'每个 Agent，清晰连接。',alt:'Agent Island 工具接入界面'},
- settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'Agent Island 偏好设置软件界面'}
+ sessions:{image:'sessions.png',text:'每个 Agent 一个位置，展开查看会话分支。',alt:'AISLAND 软件界面（示例会话）'},
+ integrations:{image:'integrations.png',text:'每个 Agent，清晰连接。',alt:'AISLAND 工具接入界面'},
+ settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'AISLAND 偏好设置软件界面'}
 };
 function selectView(name) {
   const view = views[name];
   $$('.product-tabs [role=tab]').forEach(tab => {tab.setAttribute('aria-selected', String(tab.dataset.view === name));tab.tabIndex = tab.dataset.view === name ? 0 : -1;});
-  $('#product-image').src = './assets/' + view.image;
+  $('#product-image').src = './assets/' + view.image + '?v=ai-parallel-4';
   $('#product-image').alt = view.alt;
   $('#product-description').textContent = view.text;
   $('#product-panel').setAttribute('aria-labelledby','tab-'+name);
