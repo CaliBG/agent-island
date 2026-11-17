@@ -17,7 +17,7 @@ document.addEventListener('keydown', e => {
 });
 const views = {
  sessions:{image:'sessions.png',text:'每个 Agent 一个位置，展开查看会话分支。',alt:'Agent Island 真实会话管理界面'},
- integrations:{image:'setup-assistant.png',text:'连接与启动设置，一处完成。',alt:'Agent Island 接入助手实际界面'},
+ integrations:{image:'integrations.png',text:'每个 Agent，清晰连接。',alt:'Agent Island 工具接入界面'},
  settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'Agent Island 偏好设置软件界面'}
 };
 function selectView(name) {
