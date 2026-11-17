@@ -23,7 +23,7 @@ const views = {
 function selectView(name) {
   const view = views[name];
   $$('.product-tabs [role=tab]').forEach(tab => {tab.setAttribute('aria-selected', String(tab.dataset.view === name));tab.tabIndex = tab.dataset.view === name ? 0 : -1;});
-  $('#product-image').src = './assets/' + view.image + '?v=workspace-36';
+  $('#product-image').src = './assets/' + view.image + '?v=download-20261118';
   $('#product-image').alt = view.alt;
   $('#product-description').textContent = view.text;
   $('#product-panel').setAttribute('aria-labelledby','tab-'+name);
@@ -96,3 +96,26 @@ if(story&&crawlButton){
  crawlButton.addEventListener('click',()=>{const paused=story.classList.toggle('is-paused');crawlButton.setAttribute('aria-pressed',String(paused));crawlButton.textContent=paused?'继续动效 ▷':'暂停动效 Ⅱ';});
  document.addEventListener('visibilitychange',()=>{story.classList.toggle('is-visible',!document.hidden&&story.getBoundingClientRect().bottom>0&&story.getBoundingClientRect().top<innerHeight);});
 }
+
+// Keep the licensed device geometry intact at every viewport width.
+for(const stage of document.querySelectorAll('[data-device-stage]')){
+ const fit=()=>stage.style.setProperty('--device-scale',String(stage.clientWidth/740));
+ new ResizeObserver(fit).observe(stage);fit();
+}
+const imageDialog=document.querySelector('.image-dialog');
+let imageTrigger=null;
+function openImage(src,caption,trigger){
+ if(!imageDialog)return;imageTrigger=trigger;
+ document.querySelector('#full-image').src=src;
+ document.querySelector('#full-image').alt=caption;
+ document.querySelector('#image-caption').textContent=caption;
+ imageDialog.classList.remove('is-fullsize');document.querySelector('#image-scale').setAttribute('aria-pressed','false');imageDialog.showModal();document.body.style.overflow='hidden';
+ document.querySelector('#close-image').focus();
+}
+for(const trigger of document.querySelectorAll('[data-zoom]'))trigger.addEventListener('click',()=>openImage(trigger.dataset.zoom,trigger.dataset.caption,trigger));
+document.querySelector('#zoom-current')?.addEventListener('click',event=>openImage(document.querySelector('#product-image').src,document.querySelector('#product-image').alt,event.currentTarget));
+document.querySelector('#close-image')?.addEventListener('click',()=>imageDialog.close());
+imageDialog?.addEventListener('click',event=>{if(event.target===imageDialog){const r=imageDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)imageDialog.close();}});
+imageDialog?.addEventListener('close',()=>{document.body.style.overflow='';imageTrigger?.focus({preventScroll:true});});
+
+document.querySelector('#image-scale')?.addEventListener('click',event=>{const full=imageDialog.classList.toggle('is-fullsize');event.currentTarget.setAttribute('aria-pressed',String(full));});

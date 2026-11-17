@@ -33,3 +33,12 @@ npm run dev
 v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登录启动和启动检查设置。Codex 首次信任由用户完成。Windows 已跨平台构建，实机待验证；安装包尚未签名。
 
 第三方组件与字体许可见 THIRD_PARTY_NOTICES.md。
+
+
+## 下载官网模板 · 2026-11-18
+
+页面以 MIT shadcn/UI Landing Page 的发布页结构为基础，沿用静态 HTML/CSS 与现有 React 下载按钮。样机使用 MIT Devices.css MacBook Pro；保留原始几何，整体等比缩放。截图来自 AISLAND renderer 的隔离示例数据，标明示例任务，不读取用户会话。
+
+屏幕逻辑尺寸按 1512×945，对应 1120px 应用窗、448px 小岛、179px 刘海。软件图像不拉伸、不裁切，也不添加重复标题栏。小岛截图在 footer 实际边界截取，避免额外透明留白。图片查看器可切换原始尺寸，支持 Escape 关闭并返回原焦点。
+
+在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新截图。`node scripts/marketing-qa.mjs` 验证下载、图库、图片查看器、移动导航和响应式布局。许可证见 THIRD_PARTY_NOTICES.md。
