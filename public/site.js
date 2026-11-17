@@ -20,14 +20,44 @@ const views = {
  integrations:{image:'integrations.png',text:'每个 Agent，清晰连接。',alt:'AISLAND 工具接入界面'},
  settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'AISLAND 偏好设置软件界面'}
 };
-function selectView(name) {
+let viewRequest = 0;
+async function selectView(name) {
   const view = views[name];
-  $$('.product-tabs [role=tab]').forEach(tab => {tab.setAttribute('aria-selected', String(tab.dataset.view === name));tab.tabIndex = tab.dataset.view === name ? 0 : -1;});
-  $('#product-image').src = './assets/' + view.image + '?v=download-20261118';
-  $('#product-image').alt = view.alt;
-  $('#product-description').textContent = view.text;
-  $('#product-panel').setAttribute('aria-labelledby','tab-'+name);
+  if (!view) return;
+  const request = ++viewRequest;
+  const panel = $('#product-panel');
+  panel.setAttribute('aria-busy', 'true');
+  const capture = new Image();
+  capture.src = './assets/' + view.image + '?v=editorial-20261118';
+  capture.srcset = `./assets/${name}-560.png 560w, ./assets/${name}-1120.png 1120w, ${capture.src} 2240w`;
+  capture.sizes = $('#product-image').sizes;
+  try {
+    await capture.decode();
+    if (request !== viewRequest) return;
+    $$('.product-tabs [role=tab]').forEach(tab => {
+      tab.setAttribute('aria-selected', String(tab.dataset.view === name));
+      tab.tabIndex = tab.dataset.view === name ? 0 : -1;
+    });
+    const image = $('#product-image');
+    image.classList.remove('is-changing');
+    image.srcset = capture.srcset;
+    image.src = capture.src;
+    image.alt = view.alt;
+    requestAnimationFrame(() => image.classList.add('is-changing'));
+    $('#product-description').textContent = view.text;
+    panel.setAttribute('aria-labelledby', 'tab-' + name);
+  } catch {
+    if (request === viewRequest) $('#product-description').textContent = '截图暂时未能加载，请重试或查看使用文档。';
+  } finally {
+    if (request === viewRequest) panel.setAttribute('aria-busy', 'false');
+  }
 }
+const galleryMedia = matchMedia('(max-width: 800px)');
+function orientGallery() {
+  $('.product-tabs')?.setAttribute('aria-orientation', galleryMedia.matches ? 'horizontal' : 'vertical');
+}
+galleryMedia.addEventListener('change', orientGallery);
+orientGallery();
 $$('[data-view]').forEach(tab => tab.addEventListener('click', () => selectView(tab.dataset.view)));
 $('.settings-jump')?.addEventListener('click', () => {selectView('settings');$('#tab-settings').focus({preventScroll:true});$('.product-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});});
 const examples = {
@@ -74,9 +104,9 @@ if ($('#sample-code')) setLanguage('node');
 $$('[role=tablist]').forEach(list => list.addEventListener('keydown', e => {
   const tabs = [...list.querySelectorAll('[role=tab]')];
   const index = tabs.indexOf(document.activeElement);
-  if(index < 0 || !['ArrowRight','ArrowLeft','Home','End'].includes(e.key)) return;
+  if(index < 0 || !['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home','End'].includes(e.key)) return;
   e.preventDefault();
-  const next = e.key==='Home'?0:e.key==='End'?tabs.length-1:(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+  const next = e.key==='Home'?0:e.key==='End'?tabs.length-1:(index+(['ArrowRight','ArrowDown'].includes(e.key)?1:-1)+tabs.length)%tabs.length;
   tabs[next].focus();tabs[next].click();
 }));
 let toastTimeout;
@@ -119,3 +149,14 @@ imageDialog?.addEventListener('click',event=>{if(event.target===imageDialog){con
 imageDialog?.addEventListener('close',()=>{document.body.style.overflow='';imageTrigger?.focus({preventScroll:true});});
 
 document.querySelector('#image-scale')?.addEventListener('click',event=>{const full=imageDialog.classList.toggle('is-fullsize');event.currentTarget.setAttribute('aria-pressed',String(full));});
+
+// Preview uses two captures of the real application; no simulated Agent events.
+const previewToggle = document.querySelector('#preview-toggle');
+previewToggle?.addEventListener('click', () => {
+ const expanded = previewToggle.getAttribute('aria-expanded') !== 'true';
+ previewToggle.setAttribute('aria-expanded', String(expanded));
+ document.querySelector('#island-preview').classList.toggle('is-collapsed', !expanded);
+ document.querySelector('.preview-expanded').setAttribute('aria-hidden', String(!expanded));
+ document.querySelector('.preview-collapsed').setAttribute('aria-hidden', String(expanded));
+ previewToggle.innerHTML = expanded ? '收起小岛 <span aria-hidden="true">↗</span>' : '展开小岛 <span aria-hidden="true">↗</span>';
+});

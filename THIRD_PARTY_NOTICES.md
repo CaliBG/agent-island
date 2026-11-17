@@ -9,6 +9,6 @@ Departure Mono: https://github.com/rektdeckard/departure-mono, SIL Open Font Lic
 
 ## Download-page template and device mockups
 
-Page structure adapted from leoMirandaa/shadcn-landing-page, Copyright (c) 2024 Leopoldo Miranda, MIT. Source: https://github.com/leoMirandaa/shadcn-landing-page. The page is adapted into the existing static HTML/CSS stack; the original demo cards, social proof, gradients and placeholder content are not used. Full license: public/vendor/template-LICENSE.txt.
+The earlier download page used the structure of leoMirandaa/shadcn-landing-page, Copyright (c) 2024 Leopoldo Miranda, MIT. Source: https://github.com/leoMirandaa/shadcn-landing-page. The current editorial redesign replaces that layout with original HTML/CSS. The historical MIT notice is retained; no original demo cards, social proof or placeholder content are used. Full license: public/vendor/template-LICENSE.txt.
 
-MacBook Pro frame: Devices.css v0.2.0, Copyright (c) 2017 Yan Zhu, MIT. Source: https://github.com/picturepan2/devices.css. Full license: public/vendor/devices-LICENSE.txt. The original device geometry is scaled uniformly; the screen contains screenshots of the AISLAND renderer with isolated example data.
+MacBook Pro frame: Devices.css v0.2.0, Copyright (c) 2017 Yan Zhu, MIT. Source: https://github.com/picturepan2/devices.css. Full license: public/vendor/devices-LICENSE.txt. The homepage serves a minified MacBook-only subset, preserving the upstream MIT header. The original device geometry is scaled uniformly; the screen contains screenshots of the AISLAND renderer with isolated example data.

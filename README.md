@@ -35,10 +35,17 @@ v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登�
 第三方组件与字体许可见 THIRD_PARTY_NOTICES.md。
 
 
-## 下载官网模板 · 2026-11-18
+## 产品官网重塑 · 2026-11-18
 
-页面以 MIT shadcn/UI Landing Page 的发布页结构为基础，沿用静态 HTML/CSS 与现有 React 下载按钮。样机使用 MIT Devices.css MacBook Pro；保留原始几何，整体等比缩放。截图来自 AISLAND renderer 的隔离示例数据，标明示例任务，不读取用户会话。
+新页面使用产品画册式排版：左侧下载和右侧屏幕顶部特写、Agent 接入入口、带标签切换的 MacBook 实际界面、可暂停的透视文字和系统下载列表。品牌仍为白底与亮蓝色。保留现有路由、文档、安装包及 React Hover Button。
 
-屏幕逻辑尺寸按 1512×945，对应 1120px 应用窗、448px 小岛、179px 刘海。软件图像不拉伸、不裁切，也不添加重复标题栏。小岛截图在 footer 实际边界截取，避免额外透明留白。图片查看器可切换原始尺寸，支持 Escape 关闭并返回原焦点。
+设计参考（借鉴展示方式，没有复制品牌素材或源码）：
+- [Raycast](https://www.raycast.com/)：下载优先、围绕操作展示产品。
+- [Things](https://culturedcode.com/things/)：精简文案、真实产品画面。
+- [Linear](https://linear.app/)：产品细节与清晰的字体层级。
 
-在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新截图。`node scripts/marketing-qa.mjs` 验证下载、图库、图片查看器、移动导航和响应式布局。许可证见 THIRD_PARTY_NOTICES.md。
+设计参数：布局变化 7 / 动效 5 / 密度 3。按用户要求固定白色主题；按钮为胶囊形，产品展示区与原生设备保留各自几何。动画用于入场、截图状态转换和焦点叙事，并支持系统减少动态效果。
+
+样机继续使用 MIT Devices.css MacBook Pro，整体等比缩放。屏幕中的应用截图保持 1120:740 比例，完整落在显示区域内。首屏为屏幕顶部放大特写，展开与收起使用真实 renderer 截图，而非模拟 Agent 任务。截图取自隔离示例数据，标明示例任务，不读取用户会话。
+
+在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新截图并生成响应式尺寸。单独运行 `node scripts/prepare-marketing-assets.mjs` 可重新生成图标缩略图和样机 CSS 子集（需 macOS 的 sips）。`node scripts/marketing-qa.mjs` 验证下载、截图切换、图片查看器、移动导航和响应式布局。`node scripts/social-capture.mjs` 更新分享图。许可证见 THIRD_PARTY_NOTICES.md。

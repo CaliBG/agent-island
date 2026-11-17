@@ -23,3 +23,5 @@ try{
  await page.evaluate(()=>window.__update({expanded:false}));await page.waitForTimeout(650);await page.locator('.pill').screenshot({path:out+'island-collapsed.png',omitBackground:true});
  assert.deepEqual(errors,[]);console.log('Current renderer brand screenshots captured with isolated example data.');
 }finally{await browser.close();await new Promise(r=>server.httpServer.close(r));}
+
+await import('./prepare-marketing-assets.mjs');
