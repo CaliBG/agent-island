@@ -7,6 +7,12 @@ export class AgentIsland {
   constructor({sessionId=randomUUID(),agent='Custom Agent',title='New task',cwd=process.cwd(),target,home=process.env.AGENT_ISLAND_HOME||join(homedir(),'.agent-island'),connection}={}) {
     Object.assign(this,{sessionId,agent,title,cwd,target,home,connection});
   }
+  async connect(code) {
+    const conn=this.connection||JSON.parse(await readFile(join(this.home,'connection.json'),'utf8'));
+    const url=new URL(conn.endpoint);if(url.protocol!=='http:'||url.hostname!=='127.0.0.1')throw new Error('Bridge endpoint must be local');
+    const response=await fetch(`${url.origin}/v1/connect`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${conn.token}`},body:JSON.stringify({code,agent:this.agent}),signal:AbortSignal.timeout(5000)});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||`Bridge returned ${response.status}`);return data;
+  }
   async send(event,detail={}) {
     const conn=this.connection||JSON.parse(await readFile(join(this.home,'connection.json'),'utf8'));
     const url=new URL(conn.endpoint);if(url.protocol!=='http:'||url.hostname!=='127.0.0.1')throw new Error('Bridge endpoint must be local');

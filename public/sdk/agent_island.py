@@ -11,6 +11,17 @@ class AgentIsland:
         self.base = dict(agent=agent, title=title, sessionId=session_id or str(uuid.uuid4()), cwd=cwd or os.getcwd())
         self.home = Path(home or os.environ.get("AGENT_ISLAND_HOME", Path.home() / ".agent-island"))
 
+    def connect(self, code):
+        connection = json.loads((self.home / "connection.json").read_text())
+        url = urlparse(connection["endpoint"])
+        if url.scheme != "http" or url.hostname != "127.0.0.1":
+            raise ValueError("Bridge endpoint must be local")
+        request = urllib.request.Request(connection["endpoint"] + "/v1/connect", json.dumps({"code": code, "agent": self.base["agent"]}).encode(), {
+            "Content-Type": "application/json", "Authorization": "Bearer " + connection["token"]
+        }, method="POST")
+        with urllib.request.urlopen(request, timeout=5) as response:
+            return json.load(response)
+
     def send(self, event, **detail):
         connection = json.loads((self.home / "connection.json").read_text())
         url = urlparse(connection["endpoint"])
