@@ -373,3 +373,5 @@
   .reveal, .reveal-pending { opacity: 1; transform: none; transition: none; }
   .landing *, .landing *::before, .landing *::after { transition-duration: 0s !important; }
 }
+
+.brand img[src$="wordmark.svg"]{width:150px;height:auto;border-radius:0}
