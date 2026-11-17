@@ -23,7 +23,7 @@ const views = {
 function selectView(name) {
   const view = views[name];
   $$('.product-tabs [role=tab]').forEach(tab => {tab.setAttribute('aria-selected', String(tab.dataset.view === name));tab.tabIndex = tab.dataset.view === name ? 0 : -1;});
-  $('#product-image').src = './assets/' + view.image + '?v=ui-bracket-27';
+  $('#product-image').src = './assets/' + view.image + '?v=ui-root-28';
   $('#product-image').alt = view.alt;
   $('#product-description').textContent = view.text;
   $('#product-panel').setAttribute('aria-labelledby','tab-'+name);
