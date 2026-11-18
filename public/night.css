@@ -1,0 +1,63 @@
+:root{color-scheme:dark;--text:#f2f4f8;--foreground:#f2f4f8;--background:#08090b;--muted:#acb4c1;--accent:#75a6ff;--primary:#2765ff;--border:#31353d;}
+html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.footer,.experience{background:#08090b;color:var(--text)}
+.header{border-color:#27292f}.brand img,.footer .brand img{filter:brightness(0) invert(1)}
+.masthead{background:linear-gradient(160deg,#fff 18%,#d8e6ff 67%,#86aef9)}
+.nav a,.nav-download,.footer nav,.brand-run a{color:#eef2f8}
+.brand-stream{color:var(--text)}.brand-band-toggle,.converge-all{display:none}
+.hero-statement{font-size:clamp(23px,2.2vw,36px);line-height:1.07;letter-spacing:-.045em}
+.intro-copy,.section-intro{color:#bac2cf;font-size:clamp(15px,1.1vw,18px);line-height:1.52;letter-spacing:-.015em;text-wrap:pretty;max-width:44ch;margin:15px 0}
+.device-composition::before{background:radial-gradient(ellipse,#26344d66,transparent 68%)}
+.convergence-heading,.experience-heading{align-items:end}.convergence-heading p,.experience-heading p{max-width:34ch;margin:0}
+.convergence-stage,.experience-stage,.mobile-story{background:radial-gradient(ellipse at 49% 66%,#374151,#181d25 49%,#0f1116 85%)}
+.convergence-origins button:focus-visible{outline-color:#84aeff}
+.product-card--sessions{--ink:#edf2fa;--paper:#20242b;--glow:#343e4f}.product-card--integrations{--paper:#0d2246;--glow:#224781}.product-card--settings{--paper:#20242c;--glow:#323e50}
+.download-section{background:#101217}.download-row{border-color:#2a2e37}.mobile-download,.image-dialog,.image-dialog-bar,.image-dialog-content{background:#1b1e25;color:var(--text)}.footer nav{color:#ccd2df}
+.hero-actions .secondary,.button-fallback.secondary,.interactive-hover-button{background:#20242c;color:#f4f7fc;border-color:#3e4655}.interactive-hover-button.hover-button-light{background:#225fff;color:white;border-color:#225fff}
+.menu-toggle{color:white}.has-navigation .nav.open{background:#171a20}
+.device-stage,.convergence-rig,.experience-monitor{aspect-ratio:830/503}
+.device.device-macbook-pro{background:none;width:740px;height:448.5px}
+.device.device-macbook-pro .device-frame{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;background:none}
+.device .device-header,.device .device-frame::after,.device .device-frame::before{display:none}
+.device .device-frame .device-screen,.convergence-display,.experience-screen{position:absolute;left:14%;top:2%;width:72%;height:77.4%;margin:0;padding:0;border:0;border-radius:0;overflow:hidden;background:#164685 url("./assets/mac-desktop.jpg") center/cover!important}
+.device .scene-orbit{display:none}
+.device.device-macbook-pro::after,.convergence-rig::after,.experience-monitor::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:url("./assets/macbook-pro-space-gray.png") center/100% 100% no-repeat}
+.convergence-rig,.experience-monitor{background:none;box-shadow:none;filter:drop-shadow(0 12px 15px #0005)}
+.convergence-desktop{width:100%;height:100%;background:transparent;border-radius:0}
+.convergence-window,.device .scene-window{top:10%;left:9%;width:82%}
+.experience-stage{height:auto;min-height:0;padding:clamp(12px,2vw,30px);overflow:hidden}
+.experience-monitor{position:relative;width:min(100%,990px);height:auto;padding:0;margin:auto}
+.native-island{--reveal:0;position:absolute;z-index:2;top:0;left:50%;width:58%;aspect-ratio:448/423;transform:translateX(-50%);pointer-events:none}
+.island-mask{position:absolute;inset:0;pointer-events:auto;background:#08080a;clip-path:inset(0 calc(22.55% * (1 - var(--reveal))) calc(92.2% * (1 - var(--reveal))) round 0 0 3% 3%)}
+.native-view{width:100%;height:100%;display:block}
+.native-current{position:absolute;left:13.839%;top:17.021%;width:83.036%;height:34.988%;pointer-events:none}
+.native-current .current{animation:work-current 2.8s linear infinite}
+.native-source{position:absolute;left:4.91%;top:31.44%;width:5.81%;height:6.15%;border-radius:23%;padding:.9%;background:white}
+.native-home{position:absolute;right:3%;top:1%;width:26%;height:6%}
+.native-trigger{position:absolute;left:22.55%;top:0;width:54.9%;padding:0;border:0;border-radius:0 0 8px 8px;background:#070709;pointer-events:auto;opacity:calc(1 - var(--reveal))}
+.native-trigger img{width:100%;height:auto}
+.native-trigger:focus-visible{outline:2px solid #498aff}
+.product-showcase h2{margin-bottom:10px}.product-showcase .section-intro{margin-bottom:32px}
+.docs-content p,.docs-content li,.docs-sidebar,.docs-content td{color:#c1c8d3}.docs-content pre,.docs-content :not(pre)>code,.doc-note{background:#1b202a;color:#c8daff}.docs-content a{color:#8fb6ff}
+@media(max-width:740px){.convergence-heading,.experience-heading{display:grid;gap:8px}.convergence-heading p,.experience-heading p{max-width:42ch}.hero-copy .intro-copy{max-width:39ch}.experience-monitor{width:100%}.has-navigation .nav{background:#171a20}.product-showcase h2{font-size:38px}}
+@media(prefers-reduced-motion:reduce){.native-current .current{animation:none;opacity:0}}
+@media(min-width:741px){.hero-layout{grid-template-columns:minmax(150px,1.05fr) minmax(0,3fr) minmax(188px,1fr);gap:16px}.device-composition{margin-inline:0}.hero-actions .interactive-hover-button{padding-inline:14px;}}
+.device .scene-window,.convergence-window{width:76%;left:12%;top:10%;}
+.group-switcher{position:absolute;inset:56% 0 8.5%;padding:1% 3%;display:flex;flex-direction:column;gap:5%;overflow:auto;background:#09090b;scrollbar-width:thin;}
+.group-switcher button{flex:0 0 45%;display:flex;gap:3%;align-items:center;border:0;border-radius:4px;padding:0 4%;color:#f1f1f3;background:#252529;font:600 clamp(6px,1cqw,12px)/1 system-ui;cursor:pointer}
+.group-switcher img{width:6%;height:auto;border-radius:24%;background:white}.group-switcher span{margin-left:auto}
+.native-island[data-open=false] :is(.group-switcher,.native-home){visibility:hidden}
+/* 14-inch MacBook Pro at its default 1512-point desktop width. */
+.native-island{width:calc(100% * 448 / 1512)}
+.native-trigger{width:54.6875%;left:22.65625%}
+.convergence-rig,.experience-monitor{transform-origin:50% 2%;transition:transform 780ms cubic-bezier(.22,.78,.18,1)}
+.convergence-stage[data-closeup=true] .convergence-rig{transform:translateX(-50%) scale(var(--camera-scale,2.4))}
+.experience-stage[data-closeup=true] .experience-monitor{transform:scale(var(--camera-scale,2.4))}
+.convergence-stage[data-closeup=true] .convergence-origins button:not(:hover,:focus-visible){opacity:.4}
+.convergence-origins button{transition:opacity .3s}
+@media(max-width:740px){.experience-stage{display:grid;align-items:start;min-height:260px}.experience-monitor{margin:0 auto}}
+@media(prefers-reduced-motion:reduce){.convergence-rig,.experience-monitor{transition:none}}
+@media(pointer:coarse){.native-trigger::after{content:"";position:absolute;inset:0 -5px auto;height:max(100%,40px)}}
+.native-island{container-type:inline-size}
+.group-switcher button{font-size:2.68cqw;font-weight:560;letter-spacing:0}
+.experience-stage .experience-monitor{align-self:start}
+@media(max-width:740px){.experience-stage{min-height:clamp(295px,86vw,445px)}}

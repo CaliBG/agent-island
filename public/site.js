@@ -5,12 +5,12 @@ menu?.closest('.header').classList.add('has-navigation');
 menu?.addEventListener('click', () => {
   const expanded = menu.getAttribute('aria-expanded') !== 'true';
   menu.setAttribute('aria-expanded', String(expanded));
-  menu.setAttribute('aria-label', expanded ? '收起导航' : '展开导航');
+  menu.setAttribute('aria-label', expanded ? 'Close navigation' : 'Open navigation');
   $('#navigation').classList.toggle('open', expanded);
 });
 $$('.nav a').forEach(link => link.addEventListener('click', () => {
   menu?.setAttribute('aria-expanded', 'false');
-  menu?.setAttribute('aria-label', '展开导航');
+  menu?.setAttribute('aria-label', 'Open navigation');
   $('#navigation')?.classList.remove('open');
 }));
 document.addEventListener('keydown', e => {
@@ -120,61 +120,67 @@ function resetDevicePosition() {
 deviceComposition?.addEventListener('pointerleave', resetDevicePosition);
 motionPreference.addEventListener('change', resetDevicePosition);
 
-const experience = $('#experience');
-if (experience) {
-  const sticky = $('.experience-sticky');
-  const preview = $('#island-preview');
-  const toggle = $('#preview-toggle');
-  const openCapture = $('.preview-expanded');
-  const closedCapture = $('.preview-collapsed');
-  let scheduledFrame = 0;
-  let lastProgress = 1;
-  let manualPosition = null;
-
-  function setProgress(progress, scrubbing) {
-    lastProgress = progress;
-    preview.classList.toggle('is-scrubbing', scrubbing);
-    preview.style.setProperty('--open', String(progress));
-    const expanded = progress >= .5;
-
-    if (toggle.getAttribute('aria-expanded') !== String(expanded)) {
-      toggle.setAttribute('aria-expanded', String(expanded));
-      toggle.firstChild.nodeValue = expanded ? '收起小岛 ' : '展开小岛 ';
-      openCapture.setAttribute('aria-hidden', String(!expanded));
-      closedCapture.setAttribute('aria-hidden', String(expanded));
+// Match the desktop spring. The content stays at its final scale behind a moving mask.
+for (const island of document.querySelectorAll('.native-island')) {
+  const trigger = island.querySelector('.native-trigger');
+  const home = island.querySelector('.native-home');
+  const groups = document.createElement('div');
+  groups.className='group-switcher';
+  const agents = new Map([['Codex','./assets/agents/codex.png'],['Claude Code','./assets/agents/claude.png'],['WorkBuddy','./assets/agents/workbuddy.png']]);
+  island.querySelector('.island-mask').append(groups);
+  function showAgent(name, source) {
+    agents.set(name,source);
+    island.querySelector('.native-source').src=source;
+    groups.replaceChildren();
+    for(const [agent,icon] of agents){
+      if(agent===name)continue;
+      const button=document.createElement('button');
+      button.type='button';button.setAttribute('aria-label','Show '+agent+' sessions');
+      const mark=document.createElement('img');mark.src=icon;mark.alt='';
+      const arrow=document.createElement('span');arrow.textContent='⌄';
+      button.append(mark,agent,arrow);
+      button.addEventListener('click',()=>{showAgent(agent,icon);trigger.focus({preventScroll:true});});
+      groups.append(button);
     }
   }
-
-  function updateFromScroll() {
-    scheduledFrame = 0;
-    if (!experience.classList.contains('is-scrollable') || manualPosition === window.scrollY) return;
-    manualPosition = null;
-    const rect = experience.getBoundingClientRect();
-    const travel = rect.height - sticky.offsetHeight;
-    // Hold the start and end briefly so both captures can be read at normal scroll speed.
-    const position = -rect.top / Math.max(1, travel);
-    const progress = Math.min(1, Math.max(0, (position - .09) / .76));
-    setProgress(progress * progress * (3 - 2 * progress), true);
+  showAgent('Codex',agents.get('Codex'));
+  const stage = island.closest('.experience-stage,.convergence-stage');
+  function setCameraScale(){
+    const width=island.offsetWidth, height=island.offsetHeight;
+    if (!width || !height) return;
+    const availableHeight=stage.clientHeight*(stage.classList.contains('convergence-stage') ? .64 : .76);
+    stage.style.setProperty('--camera-scale',String(Math.max(1,Math.min(4.8,availableHeight/height,stage.clientWidth*.79/width))));
   }
-
-  function scheduleScrollUpdate() {
-    if (!scheduledFrame) scheduledFrame = requestAnimationFrame(updateFromScroll);
+  new ResizeObserver(setCameraScale).observe(stage);
+  let open = false, value = 0, speed = 0, frame = 0, previous = 0, hold;
+  function draw(now) {
+    const dt = Math.min((now - (previous || now - 16)) / 1000, .032);
+    previous = now;
+    speed += ((open ? 650 : 850) * (Number(open) - value) - (open ? 45 : 54) * speed) * dt;
+    value += speed * dt;
+    const done = motionPreference.matches || (Math.abs(Number(open) - value) < .001 && Math.abs(speed) < .005);
+    if (done) { value = Number(open); speed = 0; }
+    island.style.setProperty('--reveal', String(Math.min(1, Math.max(0,value))));
+    if (done) { frame = 0; previous = 0; } else frame = requestAnimationFrame(draw);
   }
-
-  function applyMotionPreference() {
-    manualPosition = null;
-    experience.classList.toggle('is-scrollable', !motionPreference.matches);
-    if (motionPreference.matches) setProgress(1, false);
-    else scheduleScrollUpdate();
+  function setOpen(next) {
+    open = next;
+    stage.dataset.closeup=String(next);
+    island.dataset.open = String(open);
+    trigger.setAttribute('aria-expanded', String(open));
+    trigger.setAttribute('aria-label', open ? 'Close island preview' : 'Open island preview');
+    home.tabIndex = open ? 0 : -1;
+    if (!frame) frame = requestAnimationFrame(draw);
   }
-
-  toggle.hidden = false;
-  toggle.addEventListener('click', () => {
-    manualPosition = window.scrollY;
-    setProgress(lastProgress >= .5 ? 0 : 1, false);
+  home.tabIndex = -1;
+  island.addEventListener('pointerenter', e => { if(e.pointerType==='mouse') setOpen(true); });
+  island.addEventListener('pointerleave', e => { if(e.pointerType==='mouse') setOpen(false); });
+  trigger.addEventListener('click', () => setOpen(!open));
+  island.addEventListener('keydown', e => { if(e.key==='Escape') setOpen(false); });
+  document.addEventListener('pointerdown', e => { if(!island.contains(e.target)) setOpen(false); });
+  island.addEventListener('arrival', event => {
+    showAgent(event.detail.name,event.detail.source);
+    setOpen(true); clearTimeout(hold);
+    hold=setTimeout(()=>{if(!island.matches(':hover, :focus-within'))setOpen(false);},3400);
   });
-  window.addEventListener('scroll', scheduleScrollUpdate, {passive: true});
-  window.addEventListener('resize', scheduleScrollUpdate, {passive: true});
-  motionPreference.addEventListener('change', applyMotionPreference);
-  applyMotionPreference();
 }

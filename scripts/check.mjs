@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 const root = resolve('dist');
 for (const path of ['index.html','docs/index.html']) {
   const file = resolve(root,path), html = await readFile(file,'utf8');
-  assert.match(html, /<html lang="zh-CN">/);
-  assert.match(html, /<meta name="description"/);
+  assert.match(html, /<html lang="en">/);
+  assert.match(html, /<meta\b[^>]*\bname="description"/);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
   assert.equal(ids.length,new Set(ids).size,`Duplicate IDs in ${path}`);
   for(const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {

@@ -23,3 +23,7 @@ Phone mockup: project-authored CSS framing, proportional to the real AISLAND iOS
 ## Interactive model logos
 
 The OpenAI, Claude, MiniMax, Zhipu, Gemini, Grok, Qwen and DeepSeek SVGs in `public/assets/model-logos/` come from `@lobehub/icons-static-svg` 1.103.0. Copyright © 2023 LobeHub. The files preserve the upstream artwork. Brand names and trademarks belong to their respective owners. [Lobe Icons](https://github.com/lobehub/lobe-icons) · [Included MIT license](public/assets/model-logos/LICENSE.txt)
+
+## Mac desktop presentation
+
+The space gray MacBook Pro frame is derived from the 14-inch 2021 MacBook Pro artwork supplied with macOS. The desktop uses the system Mac Blue wallpaper and Finder, Safari and Terminal icons. Apple owns the device artwork, wallpaper and app marks. The AISLAND windows are captured from its own renderer using isolated sample conversations.

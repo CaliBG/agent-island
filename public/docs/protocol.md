@@ -1,152 +1,110 @@
-# Agent Island 本地接口 v1
+# AISLAND local API v1
 
-## 连接
+## Connect
 
-读取用户目录下 `.agent-island/connection.json`。包含 `endpoint`、`token`、`pid` 与 `protocol: 1`。
+Read the current user's `.agent-island/connection.json` before each request. It contains `endpoint`, `token`, `pid` and `protocol: 1`.
 
-```
+```http
 POST {endpoint}/v1/events
 Authorization: Bearer {token}
 Content-Type: application/json
 ```
 
-- 非阻塞事件返回 `202 {"ok":true}`。
-- 审批/问答/计划事件保持当前 HTTP 请求，用户处理后返回 `200` 和决定。
-- 401：令牌错误；403：拒绝浏览器来源；400：无效事件；409：相同请求仍在等待；408：请求超时；503：应用退出。
-- 负载最多 256 KiB。单条主要文本最多显示 40,000 字符，历史记录每条最多 4,000 字符、每个会话最多 120 条。
-- 最多 100 个会话；达到上限时优先清除最早的非工作/非等待会话。没有可清理会话时返回错误。
-- 页面和本地服务都不会执行 `command` 字段；它仅作为操作预览。
+Ordinary events return HTTP 202 with `{"ok":true}`. Approval, question and plan requests keep the connection open until the user responds, then return HTTP 200 with a decision.
 
-## 通用字段
+| Status | Meaning |
+| --- | --- |
+| 400 | Invalid event |
+| 401 | Invalid access token |
+| 403 | Browser origin rejected |
+| 408 | Request timed out |
+| 409 | The same request is already pending |
+| 503 | Application is shutting down |
 
-| 字段 | 必须 | 含义 |
-| --- | --- | --- |
-| sessionId | 是 | 稳定会话 ID，最长 200 字符 |
-| event | 是 | 下表中的事件名称 |
-| eventId | 否 | 最近 2000 个事件范围内的去重 ID，最长 200 字符，建议 UUID |
-| agent | 否 | 工具名称，如 My Agent |
-| title | 否 | 会话标题 |
-| cwd | 否 | 绝对工作目录 |
-| terminal | 否 | 终端名称，仅用于展示 |
-| content | 否 | 状态说明或 Markdown 内容 |
-| target | 否 | 用户点击跳转的目标，见下文 |
+The payload limit is 256 KiB. Main text is limited to 40,000 characters. Each session retains up to 120 history entries of up to 4,000 characters each. Up to 100 sessions are kept. When capacity is reached, the oldest inactive session is removed first. If all sessions are active or waiting, creation fails. Commands are displayed for review. Execution remains the caller's responsibility.
 
-## 事件
+## Common fields
 
-| event | 额外字段 | 用途 |
-| --- | --- | --- |
-| session.start | — | 会话就绪 |
-| task.start | content | 工作开始 |
-| tool.start | tool, content | 当前工具或操作 |
-| tool.end | content | 当前工具结束 |
-| message | content | 更新状态说明 |
-| approval.request | requestId, requestTitle, command, diff, content | 审批，可同时发多条 |
-| question.request | requestId, requestTitle, questions | 等待回答 |
-| plan.request | requestId, requestTitle, content | Markdown 计划审阅 |
-| task.complete | content | 本轮完成，取消未处理请求 |
-| task.error | content | 任务失败，取消未处理请求 |
-| session.end | content | 会话结束，取消未处理请求 |
-| usage | used, limit, label, resetAt | 真实上报用量；used 非负、limit 为正 |
+| Field | Description |
+| --- | --- |
+| sessionId | Required stable identifier, up to 200 characters |
+| event | Required event name |
+| eventId | Optional deduplication identifier, up to 200 characters. The bridge remembers the latest 2,000 IDs. UUIDs are recommended. |
+| agent, title | Agent and conversation display names |
+| cwd, terminal | Absolute project directory and terminal display name |
+| content | Status text or Markdown |
+| target | Optional destination for opening the original work |
 
-所有 `.request` 必须给出 requestId，建议每次生成 UUID。可选 timeoutMs，100–600000 毫秒。网络异常或取消不能解释为允许。
+## Events
 
-## 审批响应
+| Name | Fields and behavior |
+| --- | --- |
+| session.start | Session ready |
+| task.start | Task started, with optional content |
+| tool.start, tool.end | Tool name and description |
+| message | Updated status or reply in content |
+| approval.request | requestId, requestTitle, command, diff and content |
+| question.request | requestId, requestTitle and questions |
+| plan.request | requestId, requestTitle and Markdown plan in content |
+| task.complete, task.error | End the turn and cancel unhandled requests |
+| session.end | End the session and cancel pending requests |
+| usage | Report measured usage with used, limit, label and resetAt. used must be nonnegative and limit positive. |
 
-```json
-{"decision":"allow"}
-```
+Each request event needs a unique requestId. Optional timeoutMs is between 100 and 600000 milliseconds. Cancellation, disconnection and timeout do not grant permission.
 
-或者 `deny` / `cancel`。计划请求可带 `feedback` 文本。
+## Decisions
 
-## 问答
+Approvals return `{"decision":"allow"}`, deny or cancel. A plan review can also carry feedback.
 
 ```json
-{
-  "sessionId":"work-123",
-  "event":"question.request",
-  "requestId":"question-uuid",
-  "requestTitle":"选择目标环境",
-  "questions":[
-    {"id":"env","prompt":"发布到哪里？","options":["本地","测试环境"],"multiple":false}
-  ]
-}
+{"sessionId":"work-123","event":"question.request","requestId":"question-uuid","requestTitle":"Select an environment","questions":[{"id":"env","prompt":"Where should this run?","options":["Local","Staging"],"multiple":false}]}
 ```
 
-每个请求含 1–10 个问题。id 必须唯一，最长 100 字符；multiple 为 true 时允许多选。所有问题都支持自定义回答。
+Send 1–10 questions with unique IDs of up to 100 characters each. Set multiple to true for multi-select. Freeform answers are supported. Example response:
 
 ```json
-{"decision":"answer","answers":{"env":["测试环境"]}}
+{"decision":"answer","answers":{"env":["Staging"]}}
 ```
 
-## 跳转目标
+## Open a destination
 
-```json
-{"type":"folder","value":"/absolute/path/to/project"}
-```
+Use a folder or URL target with a value, such as `{"type":"folder","value":"/absolute/path/to/project"}`. For an iTerm2 session, pass `{"type":"terminal","value":"iTerm2","sessionId":"session-id"}`. For Terminal, pass a tty such as /dev/ttys012. Supported Mac apps include iTerm2, Terminal, Ghostty, Warp, WezTerm, VS Code and Cursor. Without a session identifier, AISLAND activates the app.
 
-```json
-{"type":"url","value":"https://example.com/task/123"}
-```
+For Windows Terminal, supply the PID of the terminal host with a main window, for example `{"type":"terminal","value":"Windows Terminal","pid":12345}`. With no destination, AISLAND tries the working directory.
 
-macOS 的 iTerm2：
-
-```json
-{"type":"terminal","value":"iTerm2","sessionId":"iTerm-session-unique-ID"}
-```
-
-macOS 的 Terminal：
-
-```json
-{"type":"terminal","value":"Terminal","tty":"/dev/ttys012"}
-```
-
-macOS App 激活支持：iTerm2、Terminal、Ghostty、Warp、WezTerm、VS Code、Cursor。未传 sessionId/tty 时只激活应用，不承诺定位到 tab。
-
-Windows：
-
-```json
-{"type":"terminal","value":"Windows Terminal","pid":12345}
-```
-
-PID 应为有主窗口的终端宿主进程，而非通常没有窗口的 Agent 子进程。没有目标时尝试打开 cwd。
-
-## Node.js 示例
+## SDK examples
 
 ```js
 import { AgentIsland } from './agent-island.mjs';
-const island = new AgentIsland({agent:'My Agent', title:'构建项目'});
-await island.start('正在检查代码');
-const result = await island.approve({title:'执行测试', command:'npm test'});
-if (result.decision !== 'allow') {
-  await island.complete('操作未执行');
+const island = new AgentIsland({agent:'My Agent', title:'Build project'});
+await island.start('Checking source');
+const result = await island.approve({title:'Run tests?', command:'npm test'});
+if (result.decision === 'allow') {
+  // Perform the approved operation in your own integration.
+  await island.complete('Finished');
 } else {
-  // 接入方在这里执行获批操作；SDK 本身不执行命令。
-  await island.complete('操作已完成');
+  await island.complete('Skipped');
 }
 ```
 
-## Python 示例
-
 ```python
 from agent_island import AgentIsland
-island = AgentIsland(agent="My Python Agent", title="处理数据")
-island.start("准备开始")
+island = AgentIsland(agent="My Python Agent", title="Process data")
+island.start("Preparing data")
 decision = island.approve("python process_data.py")
 if decision["decision"] == "allow":
-    island.complete("已收到允许；由接入方执行实际任务")
+    # Run the approved operation here.
+    island.complete("Finished")
 else:
-    island.complete("未执行")
+    island.complete("Skipped")
 ```
 
-## 调试
+For isolated testing, set AGENT_ISLAND_HOME to the same test directory for the app and the SDK.
 
-设置 `AGENT_ISLAND_HOME` 可将本地连接和数据放到独立测试目录。主程序和 SDK 必须使用相同的目录。不要用真实历史数据测试重启和恢复。
+## Verify first-time setup
 
+Copy the setup instructions from Integrations and paste them into an agent with local file and command access. They contain the SDK and protocol locations, connection file path and one-time verification code. The access token is read locally.
 
-## 首次接入导览（0.3.31）
+POST /v1/connect uses the same authorization and browser-origin restrictions as the events endpoint. Send `{"code":"current-code","agent":"Your Agent"}`. Use client.connect(code) in either SDK and await the call in Node.js. Repeated receipts are idempotent. Restarting AISLAND or beginning a new setup invalidates the old code.
 
-在「工具接入」点击「复制接入指令」，粘贴到能访问本机文件、执行命令的 Agent 中。指令包含 SDK、协议、连接文件路径和本次校验码，不包含认证 token。复制不会安装配置；由 Agent 按真实能力配置接入。
-
-`POST /v1/connect` 用于导览通信验证，使用与 `/v1/events` 相同的本机认证和 Origin 限制。请求体为 `{"code":"本次校验码","agent":"真实 Agent 名"}`。Node.js SDK 使用 `await client.connect(code)`，Python 使用 `client.connect(code)`。仅当前导览的校验码有效；重复回执幂等，重启应用或开始接入另一个 Agent 后旧码失效。
-
-此接口只更新导览回执，不创建会话、不发送通知、不证明生命周期 Hooks 已安装。持续进度仍须通过真实任务回调发送 `/v1/events`；审批、问答和后台派发分别取决于接入方能力。不要用测试任务或伪造完成事件代替通信验证。
+The receipt verifies local communication only. Report lifecycle events through /v1/events from actual task callbacks. Approval, questions and background dispatch depend on the integration.

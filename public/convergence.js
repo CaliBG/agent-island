@@ -3,15 +3,9 @@
   if (!section) return;
 
   const stage = section.querySelector('.convergence-stage');
-  const receiver = section.querySelector('.convergence-receiver');
-  const notch = receiver.querySelector('.convergence-notch');
-  const collection = receiver.querySelector('.convergence-collection');
-  const lastImage = section.querySelector('.convergence-last');
-  const label = section.querySelector('.convergence-model');
-  const count = section.querySelector('.convergence-count');
+  const receiver = section.querySelector('.native-island');
+  const notch = receiver.querySelector('.native-trigger');
   const status = section.querySelector('[data-convergence-status]');
-  const all = section.querySelector('.converge-all');
-  const actionText = all.querySelector('span');
   const origins = [...section.querySelectorAll('.convergence-origins button[data-model]')];
   if (!origins.length) return;
 
@@ -23,7 +17,7 @@
   let geometry;
   let frame = 0;
   let group = false;
-  let visibilityObserver;
+
 
   function measure() {
     const bounds = stage.getBoundingClientRect();
@@ -129,83 +123,32 @@
     style.opacity = String(Math.min(1, (1 - progress) * 18));
   }
 
-  function updateControl() {
-    if (!flights.size) group = false;
-    all.disabled = group;
-    actionText.textContent = group ? '正在汇入' : landed.size === origins.length ? '重新体验' : '全部上岛';
-  }
-
-  const work = section.querySelector('.island-work');
-  const diagram = work.querySelector('svg');
-  const detail = section.querySelector('.work-detail');
-  const examples = {
-    MiniMax: ['整理素材', '检查文件'],
-    Gemini: ['分析图表', '读取数据'],
-    Claude: ['审阅文稿', '整理提纲'],
-    Grok: ['汇总动态', '提取关键词'],
-    智谱: ['生成摘要', '梳理目录'],
-    通义千问: ['校对译文', '提取术语'],
-    GPT: ['检查代码', '读取项目'],
-    DeepSeek: ['分析日志', '筛选记录']
-  };
-  work.addEventListener('click', () => {
-    detail.querySelector('.work-detail-stage').append(diagram);
-    detail.showModal();
-  });
-  detail.querySelector('button').addEventListener('click', () => detail.close());
-  detail.addEventListener('close', () => {
-    work.append(diagram);
-    work.focus({preventScroll:true});
-  });
-
   function receive(origin) {
     flights.get(origin)?.tile?.remove();
     flights.delete(origin);
+    landed.add(origin);
     delete origin.dataset.flying;
     origin.dataset.landed = '';
-    const name = origin.dataset.model;
-    const image = origin.querySelector('img');
-    const source = image.currentSrc || image.src;
-    if (!landed.has(origin)) {
-      const logo = document.createElement('img');
-      logo.alt = '';
-      logo.src = source;
-      collection.append(logo);
-      landed.add(origin);
-    }
-    section.querySelector('.work-agent').setAttribute('href', source);
-    const [running, done] = examples[name] || ['整理资料', '检查清单'];
-    diagram.querySelector('.work-title').textContent = running;
-    diagram.querySelector('.done-title').textContent = done;
-    detail.querySelector('strong').textContent = name + ' · 示例任务';
-    work.setAttribute('aria-label', name + '，' + running + '进行中。放大示例任务分支');
-    lastImage.src = source;
-    lastImage.hidden = false;
-    label.textContent = name;
-    count.textContent = landed.size + ' / ' + origins.length;
-    origin.setAttribute('aria-label', name + ' 已上岛，再次汇入');
-    if (!group || !flights.size) {
-      status.textContent = landed.size === origins.length
-        ? '全部 ' + origins.length + ' 个模型已上岛'
-        : name + ' 已上岛，当前共 ' + landed.size + ' 个模型';
-    }
-    if (!reduced.matches) {
-      receiver.classList.remove('is-receiving');
-      void receiver.offsetWidth;
-      receiver.classList.add('is-receiving');
-    }
+    receiver.dispatchEvent(new CustomEvent('arrival',{detail:{name:origin.dataset.model,source:origin.querySelector('img').src}}));
+    if (!flights.size) status.textContent = landed.size + ' agents on the island.';
   }
 
   function tick(now) {
     ink?.clearRect(0, 0, geometry.width, geometry.height);
+    const bounds=stage.getBoundingClientRect(), dest=notch.getBoundingClientRect();
+    for (const path of geometry.paths.values()) {
+      path.target.x=dest.x+dest.width/2-bounds.x;
+      path.target.y=dest.y+dest.height/2-bounds.y;
+    }
     for (const [origin, flight] of flights) {
+      // The camera moves the hardware and island together during an incoming flight.
       const elapsed = now - flight.start;
       if (elapsed < 0) continue;
       if (elapsed >= flight.duration) receive(origin);
       else fly(origin, flight, elapsed / flight.duration);
     }
     frame = flights.size ? requestAnimationFrame(tick) : 0;
-    if (!frame) updateControl();
+    if (!frame) scheduleReplay();
   }
 
   function queue(origin, start) {
@@ -218,23 +161,16 @@
     } else if (!frame) {
       frame = requestAnimationFrame(tick);
     }
-    updateControl();
+    if (!flights.size) scheduleReplay();
   }
 
   function reset() {
     landed.clear();
-    collection.replaceChildren();
-    count.textContent = '0 / ' + origins.length;
-    label.textContent = '';
-    lastImage.hidden = true;
-    for (const origin of origins) {
-      delete origin.dataset.landed;
-      origin.setAttribute('aria-label', '将 ' + origin.dataset.model + ' 汇入灵动岛');
-    }
+    for (const origin of origins) delete origin.dataset.landed;
   }
 
   function launchGroup() {
-    visibilityObserver?.disconnect();
+    clearTimeout(replay);
     if (!flights.size) measure();
     if (landed.size === origins.length) reset();
     group = true;
@@ -247,7 +183,7 @@
   for (const origin of origins) {
     origin.disabled = false;
     origin.addEventListener('click', () => {
-      visibilityObserver?.disconnect();
+      clearTimeout(replay);
       if (!flights.size) measure();
       if (group) {
         // Keep visible logos moving while handing control of later launches to the visitor.
@@ -260,25 +196,24 @@
       begin();
     });
   }
-  all.addEventListener('click', launchGroup);
-  reduced.addEventListener('change', () => {
-    if (!reduced.matches) return;
-    visibilityObserver?.disconnect();
-    cancelAnimationFrame(frame);
-    frame = 0;
-    ink?.clearRect(0, 0, geometry.width, geometry.height);
-    for (const origin of flights.keys()) receive(origin);
-    updateControl();
-  });
-
-  new ResizeObserver(measure).observe(stage);
-  measure();
-  reset();
-  all.hidden = false;
-  if (!reduced.matches) {
-    visibilityObserver = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= .36)) launchGroup();
-    }, { threshold: .36 });
-    visibilityObserver.observe(stage);
+  let visible = false;
+  let replay;
+  function scheduleReplay() {
+    clearTimeout(replay);
+    if (visible && !document.hidden && !reduced.matches)
+      replay = setTimeout(() => { if (!receiver.matches(':hover, :focus-within')) launchGroup(); else scheduleReplay(); }, 4700);
   }
+  function syncPlayback() {
+    clearTimeout(replay);
+    if (!visible || document.hidden || reduced.matches || flights.size) return;
+    if (!landed.size) launchGroup(); else scheduleReplay();
+  }
+  new ResizeObserver(measure).observe(stage);
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncPlayback(); }, {threshold:.45}).observe(stage);
+  reduced.addEventListener('change', () => {
+    if (reduced.matches) {cancelAnimationFrame(frame); frame=0; for(const origin of flights.keys()) receive(origin); ink?.clearRect(0,0,geometry.width,geometry.height);}
+    syncPlayback();
+  });
+  document.addEventListener('visibilitychange',syncPlayback);
+  measure();
 })();
