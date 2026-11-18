@@ -1,6 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const menu = $('.menu-toggle');
+menu?.closest('.header').classList.add('has-navigation');
 menu?.addEventListener('click', () => {
   const expanded = menu.getAttribute('aria-expanded') !== 'true';
   menu.setAttribute('aria-expanded', String(expanded));
@@ -28,7 +29,7 @@ async function selectView(name) {
   const panel = $('#product-panel');
   panel.setAttribute('aria-busy', 'true');
   const capture = new Image();
-  capture.src = './assets/' + view.image + '?v=rescale-20261118';
+  capture.src = './assets/' + view.image + '?v=experience-20261118';
   capture.srcset = `./assets/${name}-560.png 560w, ./assets/${name}-1120.png 1120w, ${capture.src} 2240w`;
   capture.sizes = $('#product-image').sizes;
   try {
@@ -137,20 +138,84 @@ imageDialog?.addEventListener('close',()=>{document.body.style.overflow='';image
 
 document.querySelector('#image-scale')?.addEventListener('click',event=>{const full=imageDialog.classList.toggle('is-fullsize');event.currentTarget.setAttribute('aria-pressed',String(full));});
 
-// Preview uses two captures of the real application; no simulated Agent events.
-const previewToggle = document.querySelector('#preview-toggle');
-previewToggle?.addEventListener('click', () => {
- const expanded = previewToggle.getAttribute('aria-expanded') !== 'true';
- previewToggle.setAttribute('aria-expanded', String(expanded));
- document.querySelector('#island-preview').classList.toggle('is-collapsed', !expanded);
- document.querySelector('.preview-expanded').setAttribute('aria-hidden', String(!expanded));
- document.querySelector('.preview-collapsed').setAttribute('aria-hidden', String(expanded));
- previewToggle.innerHTML = expanded ? '收起小岛 <span aria-hidden="true">↗</span>' : '展开小岛 <span aria-hidden="true">↗</span>';
-});
+const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
-const ambientToggle = document.querySelector('#ambient-toggle');
-ambientToggle?.addEventListener('click', () => {
- const paused = document.querySelector('.hero').classList.toggle('motion-paused');
- ambientToggle.setAttribute('aria-pressed', String(paused));
- ambientToggle.textContent = paused ? '继续背景动效 ▷' : '暂停背景动效 Ⅱ';
+// Give each device a small, independent travel so the two real screen images stay legible.
+const deviceComposition = $('.device-composition');
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+deviceComposition?.addEventListener('pointermove', event => {
+  if (!finePointer.matches || motionPreference.matches || event.pointerType === 'touch') return;
+  const rect = deviceComposition.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - .5;
+  const y = (event.clientY - rect.top) / rect.height - .5;
+  deviceComposition.style.setProperty('--mac-x', `${x * 18}px`);
+  deviceComposition.style.setProperty('--mac-y', `${y * 12}px`);
+  deviceComposition.style.setProperty('--phone-x', `${x * -25}px`);
+  deviceComposition.style.setProperty('--phone-y', `${y * -18}px`);
 });
+function resetDevicePosition() {
+  for (const name of ['--mac-x', '--mac-y', '--phone-x', '--phone-y']) {
+    deviceComposition?.style.removeProperty(name);
+  }
+}
+deviceComposition?.addEventListener('pointerleave', resetDevicePosition);
+motionPreference.addEventListener('change', resetDevicePosition);
+
+const experience = $('#experience');
+if (experience) {
+  const sticky = $('.experience-sticky');
+  const preview = $('#island-preview');
+  const toggle = $('#preview-toggle');
+  const openCapture = $('.preview-expanded');
+  const closedCapture = $('.preview-collapsed');
+  let scheduledFrame = 0;
+  let lastProgress = 1;
+  let manualPosition = null;
+
+  function setProgress(progress, scrubbing) {
+    lastProgress = progress;
+    preview.classList.toggle('is-scrubbing', scrubbing);
+    preview.style.setProperty('--open', String(progress));
+    const expanded = progress >= .5;
+
+    if (toggle.getAttribute('aria-expanded') !== String(expanded)) {
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.firstChild.nodeValue = expanded ? '收起小岛 ' : '展开小岛 ';
+      openCapture.setAttribute('aria-hidden', String(!expanded));
+      closedCapture.setAttribute('aria-hidden', String(expanded));
+    }
+  }
+
+  function updateFromScroll() {
+    scheduledFrame = 0;
+    if (!experience.classList.contains('is-scrollable') || manualPosition === window.scrollY) return;
+    manualPosition = null;
+    const rect = experience.getBoundingClientRect();
+    const travel = rect.height - sticky.offsetHeight;
+    // Hold the start and end briefly so both captures can be read at normal scroll speed.
+    const position = -rect.top / Math.max(1, travel);
+    const progress = Math.min(1, Math.max(0, (position - .09) / .76));
+    setProgress(progress * progress * (3 - 2 * progress), true);
+  }
+
+  function scheduleScrollUpdate() {
+    if (!scheduledFrame) scheduledFrame = requestAnimationFrame(updateFromScroll);
+  }
+
+  function applyMotionPreference() {
+    manualPosition = null;
+    experience.classList.toggle('is-scrollable', !motionPreference.matches);
+    if (motionPreference.matches) setProgress(1, false);
+    else scheduleScrollUpdate();
+  }
+
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    manualPosition = window.scrollY;
+    setProgress(lastProgress >= .5 ? 0 : 1, false);
+  });
+  window.addEventListener('scroll', scheduleScrollUpdate, {passive: true});
+  window.addEventListener('resize', scheduleScrollUpdate, {passive: true});
+  motionPreference.addEventListener('change', applyMotionPreference);
+  applyMotionPreference();
+}

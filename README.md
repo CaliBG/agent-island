@@ -21,7 +21,7 @@ npm run dev
 
 预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。
 
-按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。背景动效支持暂停及系统减少动态效果偏好。界面标签页支持键盘导航。
+按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。样机响应鼠标轻微移动。动态体验随自然滚动正反展开，并支持手动开合及系统减少动态效果偏好。界面标签页支持键盘导航。
 
 ## 更新版本
 
@@ -35,7 +35,13 @@ v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登�
 第三方组件与字体许可见 THIRD_PARTY_NOTICES.md。
 
 
-## Rescale 方向重做 · 2026-11-18
+## 同框官网方向 · 2026-11-18
+
+结合 10 月 20 日使用的 Jack / 3D Creator 提示词和[同框动态体验](https://tongkuang.netlify.app/#experience)的滚动方式，首屏用 AISLAND 全宽字标、真实设备合成与两侧的标题和下载。
+
+动态体验通过自然页面滚动揭示两张真实界面截图，上滑倒回，停止滚动时画面保持。展开与收起也可用按钮操作。减少动态效果时使用静态展开画面，去掉固定滚动区。网页展示使用隔离示例任务。
+
+## 历史版式：Rescale
 
 按用户选定的 [Rescale](https://rescale.framer.ai/) / [Framer 模板](https://www.framer.com/marketplace/templates/rescale/) 视觉方向实现静态版本，继续部署在 GitHub Pages。并非 Framer 项目导出或源模板安装；未复制模板源码、图片、视频或虚构营销数据。
 
