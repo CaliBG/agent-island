@@ -18,7 +18,7 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 .device.device-macbook-pro{background:none;width:740px;height:448.5px}
 .device.device-macbook-pro .device-frame{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;background:none}
 .device .device-header,.device .device-frame::after,.device .device-frame::before{display:none}
-.device .device-frame .device-screen,.convergence-display,.experience-screen{position:absolute;left:14%;top:2%;width:72%;height:77.4%;margin:0;padding:0;border:0;border-radius:0;overflow:hidden;background:#164685 url("./assets/mac-desktop.jpg") center/cover!important}
+.device .device-frame .device-screen,.convergence-display,.experience-screen{position:absolute;left:14%;top:2%;width:72%;height:77.4%;margin:0;padding:0;border:0;border-radius:0;overflow:hidden;background:#164685 url("./assets/macbook-pro-desktop.jpg") center/cover!important}
 .device .scene-orbit{display:none}
 .device.device-macbook-pro::after,.convergence-rig::after,.experience-monitor::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:url("./assets/macbook-pro-space-gray.png") center/100% 100% no-repeat}
 .convergence-rig,.experience-monitor{background:none;box-shadow:none;filter:drop-shadow(0 12px 15px #0005)}
@@ -49,7 +49,7 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 /* 14-inch MacBook Pro at its default 1512-point desktop width. */
 .native-island{width:calc(100% * 448 / 1512)}
 .native-trigger{width:54.6875%;left:22.65625%}
-.convergence-rig,.experience-monitor{transform-origin:50% 2%;transition:transform 780ms cubic-bezier(.22,.78,.18,1)}
+.convergence-rig,.experience-monitor{transform-origin:50% 2%;transition:transform 1400ms cubic-bezier(.45,0,.18,1)}
 .convergence-stage[data-closeup=true] .convergence-rig{transform:translateX(-50%) scale(var(--camera-scale,2.4))}
 .experience-stage[data-closeup=true] .experience-monitor{transform:scale(var(--camera-scale,2.4))}
 .convergence-stage[data-closeup=true] .convergence-origins button:not(:hover,:focus-visible){opacity:.4}
@@ -66,3 +66,12 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 .hero-ascii canvas{display:block;width:100%;height:100%}
 .hero-copy{text-shadow:0 1px 5px #08090b}
 @media(max-width:740px){.hero-ascii{top:24%}}
+
+.phone-screen{position:relative;display:flex;flex-direction:column;background:#f2f2f7}
+.phone-screen::before{content:"";flex:none;height:6.1%;background:inherit}
+.phone-screen::after{content:"";position:absolute;top:1.45%;left:50%;transform:translateX(-50%);width:29%;aspect-ratio:3.5;border-radius:999px;background:#030303;pointer-events:none}
+.phone-screen img{display:block;width:100%;height:93.9%;object-fit:contain}
+.focus-story{padding-block:clamp(64px,9vw,150px);color:#f1f3f7}
+.focus-story p{max-width:37ch;margin:0 auto;font-size:clamp(25px,3.2vw,52px);font-weight:510;line-height:1.19;letter-spacing:-.037em}
+.focus-story p+p{margin-top:1.2em}
+.focus-word{display:inline-block;transform-origin:left bottom}

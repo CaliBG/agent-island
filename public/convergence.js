@@ -201,15 +201,28 @@
   function scheduleReplay() {
     clearTimeout(replay);
     if (visible && !document.hidden && !reduced.matches)
-      replay = setTimeout(() => { if (!receiver.matches(':hover, :focus-within')) launchGroup(); else scheduleReplay(); }, 4700);
+      replay = setTimeout(() => { if (!receiver.matches(':hover, :focus-within')) launchGroup(); else scheduleReplay(); }, 6000);
   }
   function syncPlayback() {
     clearTimeout(replay);
-    if (!visible || document.hidden || reduced.matches || flights.size) return;
+    if (!visible || document.hidden) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      for (const [origin, flight] of flights) {
+        flight.tile?.remove();
+        delete origin.dataset.flying;
+      }
+      flights.clear();
+      reset();
+      ink?.clearRect(0, 0, geometry.width, geometry.height);
+      receiver.dispatchEvent(new Event('previewreset'));
+      return;
+    }
+    if (reduced.matches || flights.size) return;
     if (!landed.size) launchGroup(); else scheduleReplay();
   }
   new ResizeObserver(measure).observe(stage);
-  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncPlayback(); }, {threshold:.45}).observe(stage);
+  new IntersectionObserver(([entry]) => { visible = entry.intersectionRatio >= .45; syncPlayback(); }, {threshold:.45}).observe(stage);
   reduced.addEventListener('change', () => {
     if (reduced.matches) {cancelAnimationFrame(frame); frame=0; for(const origin of flights.keys()) receive(origin); ink?.clearRect(0,0,geometry.width,geometry.height);}
     syncPlayback();

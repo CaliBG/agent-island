@@ -16,3 +16,6 @@ const background = document.querySelector('.hero-ascii');
 if (background) {
   createRoot(background).render(<GradientASCII colors={['#1e3fd8', '#f6f8ff', '#a5d8ff', '#38bdf8']} shape="horizon" characters=" =+xX0S8#@" cellSize={18} density={0.8}/>);
 }
+
+import {scrollReveal} from './ScrollReveal';
+document.querySelectorAll<HTMLElement>('.focus-story p').forEach(scrollReveal);

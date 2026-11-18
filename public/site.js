@@ -174,13 +174,18 @@ for (const island of document.querySelectorAll('.native-island')) {
   }
   home.tabIndex = -1;
   island.addEventListener('pointerenter', e => { if(e.pointerType==='mouse') setOpen(true); });
-  island.addEventListener('pointerleave', e => { if(e.pointerType==='mouse') setOpen(false); });
+  island.addEventListener('pointerleave', e => { if(e.pointerType==='mouse' && !hold) setOpen(false); });
   trigger.addEventListener('click', () => setOpen(!open));
   island.addEventListener('keydown', e => { if(e.key==='Escape') setOpen(false); });
   document.addEventListener('pointerdown', e => { if(!island.contains(e.target)) setOpen(false); });
+  island.addEventListener('previewreset', () => {
+    clearTimeout(hold);
+    hold = 0;
+    setOpen(false);
+  });
   island.addEventListener('arrival', event => {
     showAgent(event.detail.name,event.detail.source);
     setOpen(true); clearTimeout(hold);
-    hold=setTimeout(()=>{if(!island.matches(':hover, :focus-within'))setOpen(false);},3400);
+    hold=setTimeout(()=>{hold=0;if(!island.matches(':hover, :focus-within'))setOpen(false);},3400);
   });
 }

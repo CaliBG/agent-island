@@ -26,4 +26,4 @@ The OpenAI, Claude, MiniMax, Zhipu, Gemini, Grok, Qwen and DeepSeek SVGs in `pub
 
 ## Mac desktop presentation
 
-The space gray MacBook Pro frame is derived from the 14-inch 2021 MacBook Pro artwork supplied with macOS. The desktop uses the system Mac Blue wallpaper and Finder, Safari and Terminal icons. Apple owns the device artwork, wallpaper and app marks. The AISLAND windows are captured from its own renderer using isolated sample conversations.
+The space gray MacBook Pro frame is derived from the 14-inch 2021 MacBook Pro artwork supplied with macOS. The desktop uses the official Chroma Blue wallpaper supplied through Apple’s macOS DesktopPicture asset catalog and Finder, Safari and Terminal icons. Apple owns the device artwork, wallpaper and app marks. The AISLAND windows are captured from its own renderer using isolated sample conversations.
