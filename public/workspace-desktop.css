@@ -15,7 +15,7 @@ workspace-desktop::after {
   position: absolute;
   inset: 0;
   content: "";
-  background: url("./assets/workspace-desktop-glass.webp") center / 100% 100% no-repeat;
+  background: url("./assets/workspace-desktop-glass.webp?v=trapezoid") center / 100% 100% no-repeat;
   pointer-events: none;
 }
 

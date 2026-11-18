@@ -44,7 +44,7 @@
   width: 72%;
   height: 77.4%;
   overflow: hidden;
-  background: url("./assets/macbook-pro-desktop.jpg") center / cover no-repeat;
+  background: url("./assets/macbook-pro-desktop.jpg?v=trapezoid") center / cover no-repeat;
 }
 .wsi-panel {
   position: absolute;

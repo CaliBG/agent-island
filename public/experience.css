@@ -237,7 +237,14 @@ h2 span { color: var(--accent); }
 }
 .phone-zoom:hover { transform: rotate(3deg) translateY(-6px); }
 
-.download-heading h2 span { display: inline; }
+.download-heading .download-wordmark {
+  display: inline-block;
+  width: 3.45em;
+  height: .72em;
+  vertical-align: -.01em;
+  background: var(--accent);
+  mask: url("./assets/wordmark.svg") center / contain no-repeat;
+}
 .download-heading { text-align: left; display: flex; align-items: center; gap: 18px; }
 .download-heading img { margin: 0; width: 52px; height: 52px; border-radius: 12px; }
 .download-layout { margin-inline: 0; max-width: none; }
