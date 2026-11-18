@@ -42,6 +42,12 @@ async function checkLogoFlights() {
   return [...el.querySelectorAll('.convergence-flight img')].every(img => img.naturalWidth && origins.includes(img.currentSrc));
  }), 'Flights use the same brand artwork as their origins');
  await page.waitForFunction(() => document.querySelectorAll('.convergence-collection img').length === 8);
+ await stage.locator('.island-work').click();
+ const diagram = page.locator('.work-detail[open] svg');
+ assert.equal(await diagram.locator('.sweep').evaluate(el => getComputedStyle(el).animationDuration),'2.8s');
+ assert.equal(await diagram.locator('.sweep').count(),1,'Only the working branch receives a current');
+ await page.keyboard.press('Escape');
+ await stage.locator('.island-work svg').waitFor();
  const gpt = stage.locator('[data-model="GPT"]');
  await gpt.focus();
  await page.keyboard.press('Enter');

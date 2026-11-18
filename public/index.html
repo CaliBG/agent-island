@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#ffffff"><link rel="canonical" href="https://calibg.github.io/agent-island/">
 <meta property="og:type" content="website"><meta property="og:title" content="AISLAND - 任务上岛，专注不离场。"><meta property="og:description" content="少一点切换，多一点专注。macOS 与 Windows 桌面灵动岛。"><meta property="og:url" content="https://calibg.github.io/agent-island/"><meta property="og:image" content="https://calibg.github.io/agent-island/assets/social.png?v=studio-2"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg"><link rel="stylesheet" href="./vendor/devices-macbook.css"><link rel="stylesheet" href="./marketing.css?v=studio-2"><link rel="stylesheet" href="./ui/hover-buttons.css"><link rel="stylesheet" href="./experience.css?v=studio-2">
-<link rel="stylesheet" href="./convergence.css"><link rel="stylesheet" href="./agent-marquee.css"><link rel="stylesheet" href="./stack.css">
-<script src="./site.js?v=studio-2" defer></script><script src="./convergence.js" defer></script><script src="./agent-marquee.js" defer></script><script src="./stack.js" defer></script><script type="module" src="./ui/hover-buttons.js"></script>
+<link rel="stylesheet" href="./convergence.css"><link rel="stylesheet" href="./agent-marquee.css"><link rel="stylesheet" href="./stack.css"><link rel="stylesheet" href="./studio.css">
+<script src="./site.js?v=studio-2" defer></script><script src="./convergence.js?v=studio3" defer></script><script src="./agent-marquee.js" defer></script><script src="./stack.js" defer></script><script type="module" src="./ui/hover-buttons.js"></script>
 </head>
 <body>
 <svg class="symbol-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="icon-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 12.3c.03 3.2 2.81 4.26 2.84 4.27-.02.08-.44 1.52-1.46 3.01-.89 1.29-1.81 2.58-3.26 2.61-1.42.03-1.88-.84-3.5-.84-1.63 0-2.14.81-3.48.87-1.4.05-2.46-1.4-3.35-2.68-1.82-2.63-3.2-7.44-1.33-10.68.93-1.61 2.59-2.63 4.39-2.66 1.37-.03 2.66.92 3.5.92.83 0 2.4-1.14 4.04-.97.69.03 2.63.28 3.88 2.11-.1.07-2.31 1.35-2.27 4.04ZM14.4 4.4c.74-.9 1.23-2.15 1.1-3.4-1.06.04-2.35.71-3.11 1.61-.68.79-1.28 2.06-1.12 3.28 1.19.09 2.4-.61 3.13-1.49Z"/></symbol><symbol id="icon-windows" viewBox="0 0 24 24"><path fill="currentColor" d="M2 4.5 10.5 3.3v8H2zm10-1.4L22 1.7v9.6H12zM2 12.8h8.5v8L2 19.6zm10 0h10v9.5L12 20.9z"/></symbol><symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="icon-expand" viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol></defs></svg>
@@ -66,7 +66,7 @@
     </div>
     <div class="convergence-stage" role="group" aria-label="点选电脑四周的品牌标志，看它飞入屏幕顶端的小岛">
       <div class="convergence-horizon" aria-hidden="true"></div>
-      <div class="convergence-rig" aria-hidden="true">
+      <div class="convergence-rig">
         <div class="convergence-display">
           <div class="convergence-desktop">
             <img class="convergence-window" src="./assets/sessions-560.png" width="560" height="370" alt="" loading="lazy">
@@ -75,7 +75,15 @@
                 <img class="convergence-notch" src="./assets/island-collapsed.png" width="492" height="66" alt="">
                 <span class="convergence-receipt"><img class="convergence-last" width="16" height="16" alt="" hidden><span class="convergence-model"></span><b class="convergence-count">0 / 8</b></span>
               </div>
-              <div class="convergence-collection"></div>
+              <div class="convergence-collection"></div><button type="button" class="island-work" aria-label="放大示例任务分支"><svg viewBox="0 0 760 173" aria-hidden="true"><defs>
+<linearGradient id="work-blue"><stop stop-color="#267dff" stop-opacity=".7"/><stop offset=".45" stop-color="#4b9aff" stop-opacity=".32"/><stop offset="1" stop-color="#4b9aff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="work-light"><stop stop-color="#75b3ff" stop-opacity="0"/><stop offset=".5" stop-color="#a1caff" stop-opacity=".58"/><stop offset="1" stop-color="#75b3ff" stop-opacity="0"/></linearGradient>
+<path id="work-active" d="M94 59C160 59 172 5 250 5H742Q752 5 752 15V84Q752 94 742 94H250C171 94 164 86 94 86Z"/><clipPath id="work-clip"><use href="#work-active"/></clipPath></defs>
+<rect x="2" y="47" width="80" height="80" rx="21" fill="#eee"/><image class="work-agent" x="15" y="60" width="54" height="54"/>
+<use href="#work-active" fill="url(#work-blue)"/><g clip-path="url(#work-clip)"><rect class="sweep" x="-650" width="650" height="97" fill="url(#work-light)"/></g>
+<path d="M94 94C160 94 177 104 250 104H742Q752 104 752 113V158Q752 168 742 168H250C168 168 162 116 94 116Z" fill="#28292d"/>
+<text class="work-title" x="270" y="59">整理资料</text><text x="635" y="59">进行中</text><text class="done-title" x="270" y="145">检查清单</text><text x="635" y="145">已完成</text>
+</svg></button>
             </div>
           </div>
         </div>
@@ -121,6 +129,7 @@
         </button>
       </div>
     </div>
+    <dialog class="work-detail" aria-label="示例任务分支"><header><strong></strong><button type="button" aria-label="关闭任务预览">关闭</button></header><div class="work-detail-stage"></div></dialog>
     <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-convergence-status></p>
     <noscript><p>开启 JavaScript 即可点选 Logo 体验上岛。</p></noscript>
   </section>

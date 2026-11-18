@@ -93,7 +93,7 @@
       ink.beginPath();
       ink.moveTo(prev.x, prev.y);
       ink.lineTo(next.x, next.y);
-      ink.strokeStyle = 'rgba(174,219,255,' + alpha * .94 + ')';
+      ink.strokeStyle = 'rgba(39,113,244,' + alpha * .94 + ')';
       ink.lineWidth = (.66 + alpha * 3.65) * (1 - t * .36);
       ink.stroke();
       prev = next;
@@ -135,6 +135,29 @@
     actionText.textContent = group ? '正在汇入' : landed.size === origins.length ? '重新体验' : '全部上岛';
   }
 
+  const work = section.querySelector('.island-work');
+  const diagram = work.querySelector('svg');
+  const detail = section.querySelector('.work-detail');
+  const examples = {
+    MiniMax: ['整理素材', '检查文件'],
+    Gemini: ['分析图表', '读取数据'],
+    Claude: ['审阅文稿', '整理提纲'],
+    Grok: ['汇总动态', '提取关键词'],
+    智谱: ['生成摘要', '梳理目录'],
+    通义千问: ['校对译文', '提取术语'],
+    GPT: ['检查代码', '读取项目'],
+    DeepSeek: ['分析日志', '筛选记录']
+  };
+  work.addEventListener('click', () => {
+    detail.querySelector('.work-detail-stage').append(diagram);
+    detail.showModal();
+  });
+  detail.querySelector('button').addEventListener('click', () => detail.close());
+  detail.addEventListener('close', () => {
+    work.append(diagram);
+    work.focus({preventScroll:true});
+  });
+
   function receive(origin) {
     flights.get(origin)?.tile?.remove();
     flights.delete(origin);
@@ -150,6 +173,12 @@
       collection.append(logo);
       landed.add(origin);
     }
+    section.querySelector('.work-agent').setAttribute('href', source);
+    const [running, done] = examples[name] || ['整理资料', '检查清单'];
+    diagram.querySelector('.work-title').textContent = running;
+    diagram.querySelector('.done-title').textContent = done;
+    detail.querySelector('strong').textContent = name + ' · 示例任务';
+    work.setAttribute('aria-label', name + '，' + running + '进行中。放大示例任务分支');
     lastImage.src = source;
     lastImage.hidden = false;
     label.textContent = name;
