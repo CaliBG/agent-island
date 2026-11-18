@@ -4,7 +4,7 @@ import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 const file=path=>fileURLToPath(new URL('../'+path,import.meta.url));
 mkdirSync(file('public/assets/agents'),{recursive:true});
-for(const name of ['codex','claude','workbuddy','antigravity']) {
+for(const name of ['codex','claude','workbuddy','antigravity','gemini']) {
  execFileSync('sips',['-Z','96',file(`public/mobile/agents/${name}.png`),'--out',file(`public/assets/agents/${name}.png`)],{stdio:'ignore'});
 }
 for(const name of ['sessions','integrations','settings']) {

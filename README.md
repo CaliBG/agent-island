@@ -21,7 +21,7 @@ npm run dev
 
 预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。
 
-按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。样机响应鼠标轻微移动。动态体验随自然滚动正反展开，并支持手动开合及系统减少动态效果偏好。界面标签页支持键盘导航。
+按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。样机响应鼠标轻微移动。动态体验随自然滚动正反展开，并支持手动开合及系统减少动态效果偏好。三张产品截图卡随滚动依次叠放，支持键盘查看原图。品牌带可暂停，启用减少动态效果时显示静态清单。
 
 ## 更新版本
 
@@ -39,7 +39,7 @@ v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登�
 
 结合 10 月 20 日使用的 Jack / 3D Creator 提示词和[同框动态体验](https://tongkuang.netlify.app/#experience)的滚动方式，首屏用 AISLAND 全宽字标、真实设备合成与两侧的标题和下载。
 
-动态体验通过自然页面滚动揭示两张真实界面截图，上滑倒回，停止滚动时画面保持。展开与收起也可用按钮操作。减少动态效果时使用静态展开画面，去掉固定滚动区。网页展示使用隔离示例任务。
+动态体验通过自然页面滚动揭示两张真实界面截图，上滑倒回，停止滚动时画面保持。展开与收起也可用按钮操作。减少动态效果时使用静态展开画面，去掉固定滚动区。网页展示使用隔离示例任务。上岛体验从电脑四周的八个品牌标志发射图形，到达后在屏幕顶部汇集。访客可以点选或重播，交互在浏览器本地完成。接入指南列出各工具实际支持的功能。
 
 ## 历史版式：Rescale
 
@@ -51,4 +51,4 @@ v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登�
 
 截图来源：`public/assets/ios-native.png`，派生 603px 宽版本 `ios-native-603.png`。捕获使用 `xcrun simctl io <booted-device> screenshot`，不发送任务、不读取私人会话。iOS 下载仍如实标注原生版尚未公开发布。
 
-在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新桌面截图。`node scripts/prepare-marketing-assets.mjs` 生成图标缩略图和设备 CSS 子集。`node scripts/marketing-qa.mjs` 检查五种屏宽、真实截图贴合、下载、标签页及键盘操作、查看器焦点、导航与减少动态效果。`node scripts/social-capture.mjs` 更新分享图。许可证见 THIRD_PARTY_NOTICES.md。
+在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新桌面截图。`node scripts/prepare-marketing-assets.mjs` 生成图标缩略图和设备 CSS 子集。`node scripts/marketing-qa.mjs` 检查五种屏宽、真实截图贴合、下载、品牌带、八个 Logo 的飞行与去重、三卡堆叠及键盘操作、查看器焦点、导航与减少动态效果。`node scripts/social-capture.mjs` 更新分享图。许可证见 THIRD_PARTY_NOTICES.md。

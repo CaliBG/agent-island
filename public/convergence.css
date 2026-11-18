@@ -1,0 +1,274 @@
+.convergence { padding-block: clamp(42px, 6.5vw, 96px); }
+.convergence-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: clamp(18px, 2.5vw, 34px);
+}
+.converge-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  flex: none;
+  white-space: nowrap;
+  padding: 9px 17px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--accent);
+  color: white;
+  font: 600 14px/1.2 var(--sans);
+}
+.converge-all[hidden], .convergence-last[hidden] { display: none; }
+.converge-all svg { width: 15px; height: 15px; }
+.converge-all:hover { background: #0c44d7; }
+.converge-all:disabled { background: #264ea7; cursor: progress; }
+
+.convergence-stage {
+  position: relative;
+  isolation: isolate;
+  contain: layout paint;
+  container-type: inline-size;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 2.08;
+  min-height: 460px;
+  border-radius: clamp(20px, 2.5vw, 36px);
+  background:
+    radial-gradient(ellipse at 63% -80%, #439aff 6%, #214cce 54%, transparent 84%),
+    radial-gradient(ellipse at 43% 130%, #5eacff 1%, #3679ff 38%, transparent 75%),
+    #102d9a;
+}
+.convergence-horizon {
+  position: absolute;
+  inset: 67% -12% -5%;
+  border-radius: 50% 50% 0 0 / 12% 12% 0 0;
+  background: linear-gradient(#9ec5ff1a, #74a1ff0d 20%, #95bbff42);
+  box-shadow: 0 -7px 36px #719fff35;
+}
+.convergence-rig {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  width: min(38%, 530px);
+  transform: translateX(-50%);
+  container-type: inline-size;
+}
+.convergence-rig::before {
+  content: "";
+  position: absolute;
+  left: -15%;
+  top: 76%;
+  width: 130%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #03175fbd, transparent);
+  filter: blur(9px);
+}
+.convergence-display {
+  position: relative;
+  padding: 1.05% 1.05% 2.7%;
+  border-radius: 3.2cqw 3.2cqw .9cqw .9cqw;
+  background: linear-gradient(148deg, #414a5c, #121820 25%, #111520 88%, #545d70);
+  box-shadow: inset 0 1px 1px #e2ebffad, 0 0 0 1px #252f4f, 0 2cqw 5cqw #061f702e;
+}
+.convergence-desktop {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.78;
+  border-radius: 2.5cqw 2.5cqw .4cqw .4cqw;
+  background: radial-gradient(ellipse at 0 10%, #fbfdff 0%, transparent 65%),
+    linear-gradient(135deg, #d8eaff, #99befa 55%, #538df0);
+}
+.convergence-window {
+  position: absolute;
+  top: 13%;
+  left: 14%;
+  width: 72%;
+  height: auto;
+  border-radius: .7cqw;
+  box-shadow: 0 1cqw 3.5cqw #284b7e3d;
+}
+.convergence-receiver {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(88px, 34cqw, 174px);
+  transition: width .28s cubic-bezier(.22,1,.36,1);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  background: #030303;
+}
+.convergence-notch { width: 100%; }
+.convergence-receipt {
+  position: absolute;
+  inset: 0 1% 6% 16%;
+  display: flex;
+  align-items: center;
+  gap: 4%;
+  padding: 0 6%;
+  background: #030303;
+  color: white;
+  font: 570 clamp(8px, 1.9cqw, 11px)/1 var(--sans);
+}
+.convergence-last {
+  display: block;
+  height: 72%;
+  width: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  padding: 1.5%;
+  background: white;
+  border-radius: 22%;
+}
+.convergence-model { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.convergence-count { margin-left: auto; font-size: .9em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.convergence-receiver.is-receiving { animation: island-receive .55s ease-out; }
+@keyframes island-receive {
+  20% { box-shadow: 0 0 0 2px #cfe4ff, 0 1px 19px 5px #589bff; }
+}
+
+.convergence-base {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: 0 6% 1.1%;
+  transform: perspective(100cqw) rotateX(56deg);
+  transform-origin: center top;
+  border-radius: .6cqw .6cqw 2.6cqw 2.6cqw;
+  background: linear-gradient(108deg, #9facbf, #edf3f8 42%, #c8d4e2 85%, #8c9cb2);
+  box-shadow: inset 0 -1px #f9fdffba, 0 .75cqw 0 #8392a8, 0 1cqw 1px #454f66;
+}
+.convergence-hinge { width: 77%; height: 1cqw; border-radius: 0 0 1cqw 1cqw; background: #263045; }
+.convergence-keybed {
+  width: 100%;
+  display: grid;
+  gap: .48cqw;
+  padding: .45cqw;
+  margin-block: 1.05cqw;
+  overflow: hidden;
+  border-radius: 1cqw;
+  background: #7e8ea2;
+}
+.convergence-keybed i {
+  display: block;
+  height: 2.6cqw;
+  border-radius: .45cqw;
+  background: repeating-linear-gradient(90deg, #273142 0 5.7%, #3c495d 5.8% 6.5%, transparent 6.6% 7.2%);
+}
+.convergence-keybed i:nth-child(2) { background-position-x: 2cqw; }
+.convergence-keybed i:nth-child(3) { background-position-x: 3cqw; }
+.convergence-keybed i:last-child { margin-inline: 8%; background: linear-gradient(90deg, #2d3749 0 13%, transparent 13% 14%, #2d3749 14% 82%, transparent 82% 83%, #2d3749 83%); }
+.convergence-trackpad { width: 36%; height: 6cqw; border: 1px solid #96a4b7; border-radius: .7cqw; }
+
+.convergence-air, .convergence-origins { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.convergence-air { z-index: 2; }
+.convergence-origins { z-index: 3; }
+.convergence-origins button {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: clamp(44px, var(--size), 100px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 28%;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.origin-minimax  { --x: 29%; --y: 16%; --size: 4.5cqw; --tilt: -9deg; }
+.origin-gemini   { --x: 67%; --y: 13%; --size: 4.7cqw; --tilt: 7deg; }
+.origin-claude   { --x: 11%; --y: 37%; --size: 6.1cqw; --tilt: -12deg; }
+.origin-grok     { --x: 88%; --y: 32%; --size: 5.7cqw; --tilt: 11deg; }
+.origin-zhipu    { --x: 85%; --y: 61%; --size: 6.3cqw; --tilt: -6deg; }
+.origin-qwen     { --x: 11%; --y: 66%; --size: 6.6cqw; --tilt: 9deg; }
+.origin-gpt      { --x: 25%; --y: 88%; --size: 7.3cqw; --tilt: -8deg; }
+.origin-deepseek { --x: 80%; --y: 86%; --size: 7.4cqw; --tilt: 7deg; }
+.convergence-origin-art, .convergence-flight {
+  display: grid;
+  place-items: center;
+  border-radius: 28%;
+  background: linear-gradient(145deg, white 36%, #f1f6ff);
+  box-shadow: inset 0 0 0 1px white, 0 2px 0 #a6bcdf, 0 10px 22px -6px #05216580;
+}
+.convergence-origin-art {
+  width: 100%; height: 100%;
+  transform: rotate(var(--tilt));
+  transition: transform .22s ease, opacity .22s ease;
+}
+.convergence-origin-art img, .convergence-flight img {
+  width: 64%; height: 64%; object-fit: contain; pointer-events: none;
+}
+.convergence-origins button[data-flying] .convergence-origin-art { opacity: .22; }
+.convergence-origins button:focus-visible { outline: 3px solid white; outline-offset: 6px; }
+.convergence-origins button:focus-visible .convergence-origin-art { transform: translateY(-3px); }
+.convergence-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, 3px);
+  padding: 5px 9px;
+  font: 600 13px/1.2 var(--sans);
+  white-space: nowrap;
+  border-radius: 7px;
+  background: #10244b;
+  color: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+}
+.convergence-origins button:focus-visible .convergence-tooltip { opacity: 1; transform: translate(-50%, 0); }
+@media (hover:hover) {
+  .convergence-origins button:hover .convergence-origin-art { transform: translateY(-4px) rotate(0deg) scale(1.05); }
+  .convergence-origins button:hover .convergence-tooltip { opacity: 1; transform: translate(-50%, 0); }
+}
+.convergence-flight { position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none; will-change: transform, opacity; }
+@media (max-width: 740px) {
+  .convergence-stage { min-height: 385px; aspect-ratio: 1.3; }
+  .convergence-rig { width: 53%; top: 32%; }
+  .convergence-heading h2 { font-size: clamp(30px, 6.4vw, 45px); }
+  .converge-all { font-size: 13px; }
+  .convergence-origins button { width: clamp(44px, calc(var(--size) + 10px), 78px); }
+}
+@media (max-width: 480px) {
+  .convergence-stage { aspect-ratio: .94; min-height: 345px; }
+  .convergence-rig { width: 57%; }
+  .convergence-origin-art { box-shadow: inset 0 0 0 1px white, 0 2px 0 #a6bcdf, 0 5px 12px #05216545; }
+  .origin-claude { --x: 10%; }
+  .origin-grok { --x: 90%; }
+  .origin-gpt, .origin-deepseek { --size: 11cqw; }
+  .origin-zhipu { --x: 90%; --y: 58%; }
+  .origin-qwen { --x: 10%; }
+  .convergence-receipt { font-size: 8px; }
+}
+
+.convergence-receiver:has(.convergence-collection img) { width: clamp(128px, 49cqw, 222px); }
+.convergence-mouth { position: relative; width: clamp(88px, 34cqw, 174px); margin-inline: auto; }
+.convergence-collection {
+  display: flex;
+  justify-content: center;
+  gap: 3%;
+  padding: 3% 5% 5%;
+}
+.convergence-collection:empty { display: none; }
+.convergence-collection img {
+  width: 9.5%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 24%;
+  padding: 1%;
+  background: white;
+  animation: island-dock .28s ease-out both;
+}
+@keyframes island-dock {
+  from { opacity: 0; transform: translateY(-4px) scale(.75); }
+  to { opacity: 1; transform: none; }
+}
+.convergence-origins button[data-landed]:not(:hover, :focus-visible, [data-flying]) .convergence-origin-art { opacity: .78; }

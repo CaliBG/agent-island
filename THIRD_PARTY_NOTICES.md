@@ -19,3 +19,7 @@ MacBook Pro frame: Devices.css v0.2.0, Copyright (c) 2017 Yan Zhu, MIT. Source: 
 Rescale by Tamas Bodo: https://www.framer.com/marketplace/templates/rescale/ and https://rescale.framer.ai/. Selected by the product owner for the floating navigation, headline composition, light flowing background and modular product presentation. This implementation is independently written static HTML/CSS/JS for GitHub Pages; no Framer template source, proprietary media or demo metrics are bundled. The Rescale template itself is governed by its own marketplace license, not by this repository's license.
 
 Phone mockup: project-authored CSS framing, proportional to the real AISLAND iOS native simulator capture. Captures use isolated sample tasks, not private user conversations.
+
+## Interactive model logos
+
+The OpenAI, Claude, MiniMax, Zhipu, Gemini, Grok, Qwen and DeepSeek SVGs in `public/assets/model-logos/` come from `@lobehub/icons-static-svg` 1.103.0. Copyright © 2023 LobeHub. The files preserve the upstream artwork. Brand names and trademarks belong to their respective owners. [Lobe Icons](https://github.com/lobehub/lobe-icons) · [Included MIT license](public/assets/model-logos/LICENSE.txt)

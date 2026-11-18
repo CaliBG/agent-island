@@ -16,46 +16,6 @@ $$('.nav a').forEach(link => link.addEventListener('click', () => {
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {menu.click();menu.focus();}
 });
-const views = {
- sessions:{image:'sessions.png',text:'每个 Agent 一个位置，展开查看会话分支。',alt:'AISLAND 软件界面（示例会话）'},
- integrations:{image:'integrations.png',text:'每个 Agent，清晰连接。',alt:'AISLAND 工具接入界面'},
- settings:{image:'settings.png',text:'你的习惯，你来设置。',alt:'AISLAND 偏好设置软件界面'}
-};
-let viewRequest = 0;
-async function selectView(name) {
-  const view = views[name];
-  if (!view) return;
-  const request = ++viewRequest;
-  const panel = $('#product-panel');
-  panel.setAttribute('aria-busy', 'true');
-  const capture = new Image();
-  capture.src = './assets/' + view.image + '?v=experience-20261118';
-  capture.srcset = `./assets/${name}-560.png 560w, ./assets/${name}-1120.png 1120w, ${capture.src} 2240w`;
-  capture.sizes = $('#product-image').sizes;
-  try {
-    await capture.decode();
-    if (request !== viewRequest) return;
-    $$('.product-tabs [role=tab]').forEach(tab => {
-      tab.setAttribute('aria-selected', String(tab.dataset.view === name));
-      tab.tabIndex = tab.dataset.view === name ? 0 : -1;
-    });
-    const image = $('#product-image');
-    image.classList.remove('is-changing');
-    image.srcset = capture.srcset;
-    image.src = capture.src;
-    image.alt = view.alt;
-    requestAnimationFrame(() => image.classList.add('is-changing'));
-    $('#product-description').textContent = view.text;
-    panel.setAttribute('aria-labelledby', 'tab-' + name);
-  } catch {
-    if (request === viewRequest) $('#product-description').textContent = '截图暂时未能加载，请重试或查看使用文档。';
-  } finally {
-    if (request === viewRequest) panel.setAttribute('aria-busy', 'false');
-  }
-}
-$('.product-tabs')?.setAttribute('aria-orientation', 'horizontal');
-$$('[data-view]').forEach(tab => tab.addEventListener('click', () => selectView(tab.dataset.view)));
-$('.settings-jump')?.addEventListener('click', () => {selectView('settings');$('#tab-settings').focus({preventScroll:true});$('.product-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});});
 const examples = {
 node: `import { AgentIsland } from './agent-island.mjs';
 
@@ -131,7 +91,6 @@ function openImage(src,caption,trigger){
  document.querySelector('#close-image').focus();
 }
 for(const trigger of document.querySelectorAll('[data-zoom]'))trigger.addEventListener('click',()=>openImage(trigger.dataset.zoom,trigger.dataset.caption,trigger));
-document.querySelector('#zoom-current')?.addEventListener('click',event=>openImage(document.querySelector('#product-image').src,document.querySelector('#product-image').alt,event.currentTarget));
 document.querySelector('#close-image')?.addEventListener('click',()=>imageDialog.close());
 imageDialog?.addEventListener('click',event=>{if(event.target===imageDialog){const r=imageDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)imageDialog.close();}});
 imageDialog?.addEventListener('close',()=>{document.body.style.overflow='';imageTrigger?.focus({preventScroll:true});});

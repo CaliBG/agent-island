@@ -12,7 +12,6 @@ try {
     const hero = document.querySelector('.hero');
     hero.querySelector('.hero-get').remove();
     hero.querySelector('.hero-explore').remove();
-    hero.querySelector('figcaption').remove();
     document.body.replaceChildren(hero);
   });
   await page.addStyleTag({content: `
