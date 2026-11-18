@@ -51,7 +51,10 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 .native-trigger{width:54.6875%;left:22.65625%}
 .convergence-rig,.experience-monitor{transform-origin:50% 2%;transition:transform 1400ms cubic-bezier(.45,0,.18,1)}
 .convergence-stage[data-closeup=true] .convergence-rig{transform:translateX(-50%) scale(var(--camera-scale,2.4))}
-.experience-stage[data-closeup=true] .experience-monitor{transform:scale(var(--camera-scale,2.4))}
+.experience-stage .experience-monitor{width:min(100%,990px,100svh);transform:scale(var(--scroll-scale,1));transition:none}
+.experience-stage .native-trigger{pointer-events:none}
+.experience-stage .native-trigger::after{display:none}
+
 .convergence-stage[data-closeup=true] .convergence-origins button:not(:hover,:focus-visible){opacity:.4}
 .convergence-origins button{transition:opacity .3s}
 @media(max-width:740px){.experience-stage{display:grid;align-items:start;min-height:260px}.experience-monitor{margin:0 auto}}

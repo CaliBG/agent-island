@@ -18,19 +18,20 @@ try {
   await page.waitForFunction(()=>document.querySelectorAll('[data-landed]').length===8);
   await page.waitForFunction(()=>document.querySelector('.convergence-flight img'),{},{timeout:12000});
   const panel=page.locator('[data-island="explore"]');
-  const trigger=panel.locator('.native-trigger');
-  await page.locator('#experience').scrollIntoViewIfNeeded();
-  await trigger.hover();
+  const stage=page.locator('.experience-stage');
+  const moveStage=top=>stage.evaluate((el,y)=>window.scrollBy({top:el.getBoundingClientRect().top-y,behavior:'instant'}),top);
+  await moveStage(650);
+  await page.waitForFunction(()=>document.querySelector('[data-island="explore"]').style.getPropertyValue('--reveal')==='0');
+  await moveStage(75);
   await page.waitForFunction(()=>document.querySelector('[data-island="explore"]').dataset.open==='true');
-  await page.waitForTimeout(850);
   const ratios=await panel.evaluate(el=>{
     const w=e=>e.getBoundingClientRect().width;
-    return [w(el)/w(el.parentElement),w(el.querySelector('button.native-trigger'))/w(el.parentElement),w(el)/el.offsetWidth];
+    return [w(el)/w(el.parentElement),w(el.querySelector('.native-trigger'))/w(el.parentElement),w(el)/el.offsetWidth];
   });
   assert(Math.abs(ratios[0]-448/1512)<.001 && Math.abs(ratios[1]-245/1512)<.001 && ratios[2]>1.1);
   await panel.getByRole('button',{name:'Show WorkBuddy sessions'}).click();
   assert.match(await panel.locator('.native-source').getAttribute('src'),/workbuddy/);
-  await page.mouse.move(0,0);
+  await moveStage(650);
   await page.waitForFunction(()=>document.querySelector('[data-island="explore"]').dataset.open==='false');
   const card=page.locator('.product-card').last();
   await card.scrollIntoViewIfNeeded();
@@ -59,5 +60,5 @@ try {
   await plain.goto(base);
   assert(await plain.getByRole('link',{name:'Download for Mac',exact:true}).isVisible());
   assert.deepEqual(errors,[]);
-  console.log('PASS: device fit at five widths, camera and native proportions, hover, live branches, continuous logo flights, accessible downloads, English routes and reduced motion.');
+  console.log('PASS: device fit at five widths, camera and native proportions, scroll reveal, live branches, continuous logo flights, accessible downloads, English routes and reduced motion.');
 } finally {await browser.close();}

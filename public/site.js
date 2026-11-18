@@ -124,6 +124,7 @@ motionPreference.addEventListener('change', resetDevicePosition);
 for (const island of document.querySelectorAll('.native-island')) {
   const trigger = island.querySelector('.native-trigger');
   const home = island.querySelector('.native-home');
+  const scrollDriven = island.dataset.island === 'explore';
   const groups = document.createElement('div');
   groups.className='group-switcher';
   const agents = new Map([['Codex','./assets/agents/codex.png'],['Claude Code','./assets/agents/claude.png'],['WorkBuddy','./assets/agents/workbuddy.png']]);
@@ -139,17 +140,50 @@ for (const island of document.querySelectorAll('.native-island')) {
       const mark=document.createElement('img');mark.src=icon;mark.alt='';
       const arrow=document.createElement('span');arrow.textContent='⌄';
       button.append(mark,agent,arrow);
-      button.addEventListener('click',()=>{showAgent(agent,icon);trigger.focus({preventScroll:true});});
+      button.addEventListener('click',()=>{showAgent(agent,icon);(scrollDriven ? groups.querySelector('button') : trigger)?.focus({preventScroll:true});});
       groups.append(button);
     }
   }
   showAgent('Codex',agents.get('Codex'));
   const stage = island.closest('.experience-stage,.convergence-stage');
+  let cameraScale=1;
   function setCameraScale(){
     const width=island.offsetWidth, height=island.offsetHeight;
     if (!width || !height) return;
     const availableHeight=stage.clientHeight*(stage.classList.contains('convergence-stage') ? .64 : .76);
-    stage.style.setProperty('--camera-scale',String(Math.max(1,Math.min(4.8,availableHeight/height,stage.clientWidth*.79/width))));
+    cameraScale=Math.max(1,Math.min(4.8,availableHeight/height,stage.clientWidth*.79/width));
+    stage.style.setProperty('--camera-scale',String(cameraScale));
+  }
+  if (scrollDriven) {
+    let scheduled=0;
+    const smooth=value=>{
+      const t=Math.max(0,Math.min(1,value));
+      return t*t*(3-2*t);
+    };
+    function renderScroll() {
+      scheduled=0;
+      const bounds=stage.getBoundingClientRect();
+      const rest=Math.min(64,innerHeight*.075);
+      const start=Math.min(innerHeight-bounds.height-rest,innerHeight*.75);
+      const travel=Math.max(110,(start-64)*.86);
+      const progress=motionPreference.matches ? 1 : (start-bounds.top)/travel;
+      const reveal=smooth((progress-.26)/.60);
+      stage.style.setProperty('--scroll-scale',String(1+(cameraScale-1)*smooth(progress/.88)));
+      island.style.setProperty('--reveal',String(reveal));
+      const interactive=reveal>=.98;
+      island.dataset.open=String(interactive);
+      home.tabIndex=interactive?0:-1;
+      groups.inert=!interactive;
+    }
+    const schedule=()=>{if(!scheduled)scheduled=requestAnimationFrame(renderScroll);};
+    new ResizeObserver(()=>{setCameraScale();schedule();}).observe(stage);
+    window.addEventListener('scroll',schedule,{passive:true});
+    window.addEventListener('resize',schedule);
+    window.addEventListener('pageshow',schedule);
+    motionPreference.addEventListener('change',schedule);
+    setCameraScale();
+    renderScroll();
+    continue;
   }
   new ResizeObserver(setCameraScale).observe(stage);
   let open = false, value = 0, speed = 0, frame = 0, previous = 0, hold;
