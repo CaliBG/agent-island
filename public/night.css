@@ -10,7 +10,6 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 .convergence-heading,.experience-heading{align-items:end}.convergence-heading p,.experience-heading p{max-width:34ch;margin:0}
 .convergence-stage,.experience-stage,.mobile-story{background:radial-gradient(ellipse at 49% 66%,#374151,#181d25 49%,#0f1116 85%)}
 .convergence-origins button:focus-visible{outline-color:#84aeff}
-.product-card--sessions{--ink:#edf2fa;--paper:#20242b;--glow:#343e4f}.product-card--integrations{--paper:#0d2246;--glow:#224781}.product-card--settings{--paper:#20242c;--glow:#323e50}
 .download-section{background:#101217}.download-row{border-color:#2a2e37}.mobile-download,.image-dialog,.image-dialog-bar,.image-dialog-content{background:#1b1e25;color:var(--text)}.footer nav{color:#ccd2df}
 .hero-actions .secondary,.button-fallback.secondary,.interactive-hover-button{background:#20242c;color:#f4f7fc;border-color:#3e4655}.interactive-hover-button.hover-button-light{background:#225fff;color:white;border-color:#225fff}
 .menu-toggle{color:white}.has-navigation .nav.open{background:#171a20}
@@ -36,7 +35,6 @@ html,body,.brand-band,.header,.convergence,.product-showcase,.download-section,.
 .native-trigger{position:absolute;left:22.55%;top:0;width:54.9%;padding:0;border:0;border-radius:0 0 8px 8px;background:#070709;pointer-events:auto;opacity:calc(1 - var(--reveal))}
 .native-trigger img{width:100%;height:auto}
 .native-trigger:focus-visible{outline:2px solid #498aff}
-.product-showcase h2{margin-bottom:10px}.product-showcase .section-intro{margin-bottom:32px}
 .docs-content p,.docs-content li,.docs-sidebar,.docs-content td{color:#c1c8d3}.docs-content pre,.docs-content :not(pre)>code,.doc-note{background:#1b202a;color:#c8daff}.docs-content a{color:#8fb6ff}
 @media(max-width:740px){.convergence-heading,.experience-heading{display:grid;gap:8px}.convergence-heading p,.experience-heading p{max-width:42ch}.hero-copy .intro-copy{max-width:39ch}.experience-monitor{width:100%}.has-navigation .nav{background:#171a20}.product-showcase h2{font-size:38px}}
 @media(prefers-reduced-motion:reduce){.native-current .current{animation:none;opacity:0}}

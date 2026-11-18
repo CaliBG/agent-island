@@ -33,14 +33,38 @@ try {
   assert.match(await panel.locator('.native-source').getAttribute('src'),/workbuddy/);
   await moveStage(650);
   await page.waitForFunction(()=>document.querySelector('[data-island="explore"]').dataset.open==='false');
-  const card=page.locator('.product-card').last();
+  // Start each scene only after its card pins, and finish before the next card overlaps it.
+  const workspaceCards = page.locator('.product-card');
+  async function scrubCard(index, fraction) {
+    await workspaceCards.nth(index).evaluate((card, fraction) => {
+      const marker = card.previousElementSibling.getBoundingClientRect().top;
+      const next = card.nextElementSibling.getBoundingClientRect().top;
+      const runway = next - marker - card.offsetHeight;
+      const pin = parseFloat(getComputedStyle(card).top);
+      window.scrollBy({top: marker - pin + runway * fraction, behavior: 'instant'});
+    }, fraction);
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    return workspaceCards.nth(index).evaluate(card => Number(card.style.getPropertyValue('--workspace-progress')));
+  }
+  for (let index = 0; index < 3; index++) {
+    assert.equal(await scrubCard(index, -.02), 0);
+    const midway = await scrubCard(index, .45);
+    assert(midway > .4 && midway < .65);
+    assert.equal(await scrubCard(index, .96), 1);
+    assert.equal(await scrubCard(index, -.02), 0);
+  }
+  const card=workspaceCards.last();
   await card.scrollIntoViewIfNeeded();
   assert.equal(await card.evaluate(el=>getComputedStyle(el).position),'sticky');
   await page.locator('.phone-zoom').click(); await page.locator('.image-dialog[open]').waitFor();await page.keyboard.press('Escape');
   assert.equal(await page.locator('#download a[href$=".exe"]').count(),1);
   for(const width of [320,390,768,1024,1440]){
     await page.setViewportSize({width,height:844});
-    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+    await page.evaluate(() => {
+      window.scrollTo({top: 0, behavior: 'instant'});
+      // Device sizing is updated by ResizeObserver after layout.
+      return new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+    });
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Overflow at '+width);
     const inside=await page.locator('.hero-mac .scene-window img').evaluate(img=>{
       const box=img.parentElement,screen=img.closest('.device-screen');
@@ -49,6 +73,8 @@ try {
     assert(inside,'Real capture fits the display at '+width);
   }
   await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(() => [...document.querySelectorAll('.product-card')].every(card =>
+    card.style.getPropertyValue('--workspace-progress') === '1' && getComputedStyle(card).position !== 'sticky'));
   await page.locator('[data-model="GPT"]').click();
   assert.equal(await page.locator('.convergence-flight').count(),0);
   for(const path of ['', 'docs/', '404.html', 'mobile/']){

@@ -1,0 +1,89 @@
+/* Live layers beneath the alpha capture of the English desktop renderer. */
+workspace-desktop {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 1120 / 740;
+  overflow: hidden;
+  border-radius: 1.25%;
+  background-color: #08090c;
+  box-shadow: 0 0 0 1px #ffffff20, 0 14px 44px #0005;
+}
+
+workspace-desktop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: url("./assets/workspace-desktop-glass.webp") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.workspace-desk-light {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  mask-image: radial-gradient(ellipse at 100% 0%, #000 8%, #000c 45%, transparent 96%);
+}
+
+.workspace-desk-light i {
+  position: absolute;
+  right: -2%;
+  top: -7%;
+  width: 175%;
+  height: 200%;
+  transform-origin: 100% 0%;
+  transform: rotate(calc(-12deg + var(--workspace-progress, 0) * 34deg));
+  opacity: calc(.39 + var(--workspace-progress, 0) * .28);
+  background-image: conic-gradient(from var(--beam-angle) at 100% 0%,
+    transparent 0deg, var(--beam-color) 4deg, transparent 13deg);
+}
+
+.workspace-desk-signal {
+  position: absolute;
+  z-index: 1;
+  left: 28.0357%;
+  top: 42.8421%;
+  width: 66.4286%;
+  height: 20%;
+  pointer-events: none;
+}
+
+.workspace-desk-signal rect {
+  transform: translateX(calc(-650px + var(--workspace-progress, 0) * 1700px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-desk-light i { transform: rotate(3deg); opacity: .48; }
+  .workspace-desk-signal { display: none; }
+}
+
+@media (forced-colors: active), (prefers-reduced-transparency: reduce) {
+  .workspace-desk-light { visibility: hidden; }
+}
+
+.product-scene:has(> workspace-desktop) {
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+
+.product-scene > workspace-desktop {
+  width: min(94cqw, calc(94cqh * 1120 / 740));
+}
+
+/* A detail of the actual activity pane keeps the small-screen type readable. */
+@media (max-width: 700px) {
+  .product-scene > workspace-desktop {
+    width: min(98cqw, calc(97cqh * 598 / 432));
+    aspect-ratio: 598 / 432;
+    border-radius: 2%;
+  }
+  workspace-desktop::after { background-image: url("./assets/workspace-desktop-detail.webp"); }
+  .workspace-desk-signal {
+    left: 15.0502%;
+    top: 59.9609%;
+    width: 77.9264%;
+    height: 34.2593%;
+  }
+}

@@ -1,0 +1,114 @@
+.workspace-island-scene {
+  --p: clamp(0, var(--workspace-progress, 0), 1);
+  --ease: calc(var(--p) * var(--p) * (3 - 2 * var(--p)));
+  --camera: calc(1 + (var(--compact-zoom, 1) - 1) * var(--ease));
+  --camera-top: calc(var(--rig-rest-top, 2%) * (1 - var(--ease)) + 22% * var(--ease));
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+}
+.workspace-island-scene[data-workspace-island="activity"] {
+  --camera: calc(var(--compact-zoom, 1) + (var(--activity-zoom, 1) - var(--compact-zoom, 1)) * var(--ease));
+  --camera-top: calc(22% - 19% * var(--ease));
+  --w: clamp(0, calc((var(--p) - .04) / .62), 1);
+  --h: clamp(0, calc((var(--p) - .10) / .82), 1);
+  --w-ease: calc(var(--w) * var(--w) * (3 - 2 * var(--w)));
+  --h-ease: calc(var(--h) * var(--h) * (3 - 2 * var(--h)));
+}
+.wsi-rig {
+  position: absolute;
+  top: var(--camera-top);
+  left: 50%;
+  /* Paint the UI at close-up resolution, then let the compositor pull back. */
+  --render-zoom: max(1, var(--compact-zoom, 1), var(--activity-zoom, 1));
+  width: calc(var(--rig-width, 94%) * var(--render-zoom));
+  aspect-ratio: 830 / 503;
+  transform: translateX(-50%) scale(calc(var(--camera) / var(--render-zoom)));
+  transform-origin: 50% 0;
+}
+.wsi-rig::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("./assets/macbook-pro-space-gray.png") center / 100% 100% no-repeat;
+}
+.wsi-display {
+  position: absolute;
+  left: 14%;
+  top: 2.18%;
+  width: 72%;
+  height: 77.4%;
+  overflow: hidden;
+  background: url("./assets/macbook-pro-desktop.jpg") center / cover no-repeat;
+}
+.wsi-panel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(100% * 448 / 1512);
+  aspect-ratio: 448 / 423;
+  transform: translateX(-50%);
+  container-type: inline-size;
+}
+.wsi-reveal {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc(22.55% * (1 - var(--w-ease))) calc(92.2% * (1 - var(--h-ease))) round 0 0 4% 4%);
+}
+.wsi-panel-capture, .wsi-compact-capture { display: block; width: 100%; height: 100%; }
+.wsi-current { position: absolute; left: 13.839%; top: 17.021%; width: 83.036%; height: 34.988%; }
+.wsi-glint { animation: work-current 2.8s linear infinite; animation-play-state: paused; }
+.wsi-in-view .wsi-glint { animation-play-state: running; }
+.wsi-compact {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(100% * 246 / 448);
+  aspect-ratio: 246 / 35;
+  transform: translateX(-50%);
+}
+/* Keep the brand and status in the two physical notch wings throughout the reveal. */
+.wsi-head {
+  position: absolute;
+  top: 0;
+  inset-inline: calc(22.55% * (1 - var(--w-ease)));
+  height: 8.27%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 39.96cqw minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 0 0 calc(1.5cqw * (1 - var(--h-ease))) calc(1.5cqw * (1 - var(--h-ease)));
+  background: #09090b;
+  box-shadow: inset 0 -1px rgba(95, 96, 106, calc(.4 * var(--h-ease)));
+}
+.wsi-brand-wing, .wsi-home-wing { position: relative; overflow: hidden; display: flex; align-items: center; }
+.wsi-brand-wing svg { width: 29.46cqw; height: 7.36cqw; flex: none; }
+.wsi-home-wing { grid-column: 3; justify-content: center; }
+.wsi-wing-orbit {
+  position: absolute; right: 0; top: 0; height: 100%; aspect-ratio: 1;
+  opacity: clamp(0, calc(1 - var(--w-ease) * 2), 1);
+}
+.wsi-wing-orbit svg { display: block; width: 100%; height: 100%; }
+.wsi-home-control {
+  width: min(80%, 21.88cqw);
+  height: auto;
+  opacity: clamp(0, calc((var(--w-ease) - .31) * 1.9), 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wsi-in-view .wsi-compact-orbit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    aspect-ratio: 1;
+    border-bottom-right-radius: 20%;
+    background: #030304 url("./assets/workspace-orbit.webp") center / contain no-repeat;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wsi-glint { animation: none; opacity: 0; }
+}
