@@ -28,7 +28,7 @@ async function selectView(name) {
   const panel = $('#product-panel');
   panel.setAttribute('aria-busy', 'true');
   const capture = new Image();
-  capture.src = './assets/' + view.image + '?v=editorial-20261118';
+  capture.src = './assets/' + view.image + '?v=rescale-20261118';
   capture.srcset = `./assets/${name}-560.png 560w, ./assets/${name}-1120.png 1120w, ${capture.src} 2240w`;
   capture.sizes = $('#product-image').sizes;
   try {
@@ -52,12 +52,7 @@ async function selectView(name) {
     if (request === viewRequest) panel.setAttribute('aria-busy', 'false');
   }
 }
-const galleryMedia = matchMedia('(max-width: 800px)');
-function orientGallery() {
-  $('.product-tabs')?.setAttribute('aria-orientation', galleryMedia.matches ? 'horizontal' : 'vertical');
-}
-galleryMedia.addEventListener('change', orientGallery);
-orientGallery();
+$('.product-tabs')?.setAttribute('aria-orientation', 'horizontal');
 $$('[data-view]').forEach(tab => tab.addEventListener('click', () => selectView(tab.dataset.view)));
 $('.settings-jump')?.addEventListener('click', () => {selectView('settings');$('#tab-settings').focus({preventScroll:true});$('.product-tabs').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});});
 const examples = {
@@ -119,14 +114,6 @@ $('.copy-button')?.addEventListener('click', async () => {
   catch {const range=document.createRange();range.selectNodeContents($('#sample-code'));const selection=getSelection();selection.removeAllRanges();selection.addRange(range);notify('已选中代码，请按 Ctrl / ⌘ + C 复制');}
 });
 
-const story=document.querySelector('.focus-story');
-const crawlButton=document.querySelector('#crawl-toggle');
-if(story&&crawlButton){
- const observer=new IntersectionObserver(entries=>{for(const entry of entries)story.classList.toggle('is-visible',entry.isIntersecting);},{threshold:.15});observer.observe(story);
- crawlButton.addEventListener('click',()=>{const paused=story.classList.toggle('is-paused');crawlButton.setAttribute('aria-pressed',String(paused));crawlButton.textContent=paused?'继续动效 ▷':'暂停动效 Ⅱ';});
- document.addEventListener('visibilitychange',()=>{story.classList.toggle('is-visible',!document.hidden&&story.getBoundingClientRect().bottom>0&&story.getBoundingClientRect().top<innerHeight);});
-}
-
 // Keep the licensed device geometry intact at every viewport width.
 for(const stage of document.querySelectorAll('[data-device-stage]')){
  const fit=()=>stage.style.setProperty('--device-scale',String(stage.clientWidth/740));
@@ -159,4 +146,11 @@ previewToggle?.addEventListener('click', () => {
  document.querySelector('.preview-expanded').setAttribute('aria-hidden', String(!expanded));
  document.querySelector('.preview-collapsed').setAttribute('aria-hidden', String(expanded));
  previewToggle.innerHTML = expanded ? '收起小岛 <span aria-hidden="true">↗</span>' : '展开小岛 <span aria-hidden="true">↗</span>';
+});
+
+const ambientToggle = document.querySelector('#ambient-toggle');
+ambientToggle?.addEventListener('click', () => {
+ const paused = document.querySelector('.hero').classList.toggle('motion-paused');
+ ambientToggle.setAttribute('aria-pressed', String(paused));
+ ambientToggle.textContent = paused ? '继续背景动效 ▷' : '暂停背景动效 Ⅱ';
 });

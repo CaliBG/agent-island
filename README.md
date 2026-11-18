@@ -21,7 +21,7 @@ npm run dev
 
 预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。
 
-按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。透视文字支持暂停及系统减少动态效果偏好。界面标签页支持键盘导航。
+按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。背景动效支持暂停及系统减少动态效果偏好。界面标签页支持键盘导航。
 
 ## 更新版本
 
@@ -35,17 +35,14 @@ v0.2.4 提供接入助手、Codex Hooks 信任状态检查，以及独立的登�
 第三方组件与字体许可见 THIRD_PARTY_NOTICES.md。
 
 
-## 产品官网重塑 · 2026-11-18
+## Rescale 方向重做 · 2026-11-18
 
-新页面使用产品画册式排版：左侧下载和右侧屏幕顶部特写、Agent 接入入口、带标签切换的 MacBook 实际界面、可暂停的透视文字和系统下载列表。品牌仍为白底与亮蓝色。保留现有路由、文档、安装包及 React Hover Button。
+按用户选定的 [Rescale](https://rescale.framer.ai/) / [Framer 模板](https://www.framer.com/marketplace/templates/rescale/) 视觉方向实现静态版本，继续部署在 GitHub Pages。并非 Framer 项目导出或源模板安装；未复制模板源码、图片、视频或虚构营销数据。
 
-设计参考（借鉴展示方式，没有复制品牌素材或源码）：
-- [Raycast](https://www.raycast.com/)：下载优先、围绕操作展示产品。
-- [Things](https://culturedcode.com/things/)：精简文案、真实产品画面。
-- [Linear](https://linear.app/)：产品细节与清晰的字体层级。
+悬浮胶囊导航、居中大标题及描边词组、白蓝流动背景、电脑和手机组合样机、双色块功能展示、截图标签页与下载区。保留原有文档、手机网页和 Release 下载地址。背景可暂停，遵循减少动态效果设置。
 
-设计参数：布局变化 7 / 动效 5 / 密度 3。按用户要求固定白色主题；按钮为胶囊形，产品展示区与原生设备保留各自几何。动画用于入场、截图状态转换和焦点叙事，并支持系统减少动态效果。
+桌面图取自真实 renderer 的隔离示例数据。MacBook 使用 MIT Devices.css 原始几何整体等比缩放，应用窗口完整保留 1120:740 比例。手机图来自已运行的 iOS 原生 SwiftUI 模拟器界面（DEBUG 隔离 fixture），1206×2622，完整嵌入等比例 CSS 手机框，截图自带状态栏及灵动岛；没有重新绘制或叠加假系统 UI。手机框为本项目 CSS 绘制。不会把模拟器截图描述成真机验收结果。
 
-样机继续使用 MIT Devices.css MacBook Pro，整体等比缩放。屏幕中的应用截图保持 1120:740 比例，完整落在显示区域内。首屏为屏幕顶部放大特写，展开与收起使用真实 renderer 截图，而非模拟 Agent 任务。截图取自隔离示例数据，标明示例任务，不读取用户会话。
+截图来源：`public/assets/ios-native.png`，派生 603px 宽版本 `ios-native-603.png`。捕获使用 `xcrun simctl io <booted-device> screenshot`，不发送任务、不读取私人会话。iOS 下载仍如实标注原生版尚未公开发布。
 
-在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新截图并生成响应式尺寸。单独运行 `node scripts/prepare-marketing-assets.mjs` 可重新生成图标缩略图和样机 CSS 子集（需 macOS 的 sips）。`node scripts/marketing-qa.mjs` 验证下载、截图切换、图片查看器、移动导航和响应式布局。`node scripts/social-capture.mjs` 更新分享图。许可证见 THIRD_PARTY_NOTICES.md。
+在 sibling desktop-app 中运行 `node ../website/scripts/product-captures.mjs` 可刷新桌面截图。`node scripts/prepare-marketing-assets.mjs` 生成图标缩略图和设备 CSS 子集。`node scripts/marketing-qa.mjs` 检查五种屏宽、真实截图贴合、下载、标签页及键盘操作、查看器焦点、导航与减少动态效果。`node scripts/social-capture.mjs` 更新分享图。许可证见 THIRD_PARTY_NOTICES.md。
