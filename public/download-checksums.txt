@@ -1,5 +1,5 @@
-e2b5d82e432ea2c8f664f315f3f2bedea163dbf08ecf4b48b41919466af7a682  Agent-Island-0.3.49-mac-arm64.dmg
-724206a9b0bab540ea81f0f306e643d4cb834e4c2368b2a0056559f3930ee70d  Agent-Island-0.3.49-win-x64.exe
+4275a2283e5dd3754c8b9839dcefdb67bca8bb9c0d80d34a997e5421091b29aa  Agent-Island-0.3.50-mac-arm64.dmg
+cd38af070d2eb137544fdb95cde713acccd18ce256d0129ca6d1c4bbc7318557  Agent-Island-0.3.50-win-x64.exe
 99f4602834dd409d15be5bba148cabd6ab2ad72301eb07dcb2b54dd8a690b784  AISLAND-MiniMax-Code-Plugin-1.1.0.zip
 d2094e6a28ce8d628f75469668975e3b49ffac7e198883eb0fb1f4aa8fb5e0c5  Agent-Island-Sync-0.2.0.zip
-9ddeebdefe2b71adeec372aeab7f69346e5c89f28443a37488bef80b9738b9e0  AISLAND-Mobile-0.2.2-android.apk
+91299ac3f0ebdd3504f1653c5bfede40e6bfdb53ba43b99e4390b7245f4606f2  AISLAND-Mobile-0.2.3-android.apk
