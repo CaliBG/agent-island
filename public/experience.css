@@ -320,6 +320,15 @@ h2 span { color: var(--accent); }
   .download-heading img { width: 38px; height: 38px; border-radius: 9px; }
   .download-layout { grid-template-columns: 1fr; gap: 24px; }
   .download-row { gap: 10px; grid-template-columns: 25px minmax(0, 1fr) auto; }
+  .download-row:has(> .platform-icon) > [data-hover-button] {
+    width: 144px;
+    justify-self: end;
+  }
+  .download-row:has(> .platform-icon) > [data-hover-button] > a {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+  }
   .download-row .interactive-hover-button, .download-row .button-fallback { min-width: 0; font-size: 11px; white-space: nowrap; }
   .mobile-download { padding: 20px; }
   .footer { flex-wrap: wrap; gap: 15px; padding-block: 24px; }

@@ -1,7 +1,7 @@
 .hero-film {
   display: grid;
   width: 100%;
-  margin: 14px 0 0;
+  margin: 0;
   text-decoration: none;
   color: #f5f7fc;
 }
@@ -24,10 +24,35 @@
 .film-dialog video { display: block; width: 100%; height: auto; max-height: 82dvh; background: #08090a; border-radius: 12px; }
 .film-close { display: grid; place-content: center; margin: 0 0 6px auto; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #282b31; color: white; font-size: 25px; cursor: pointer; }
 html:has(.film-dialog[open]) { overflow: hidden; }
-@media (min-width: 741px) { .hero-get:has(.hero-film) { width: min(100%, 220px); } }
+@media (min-width: 741px) {
+  .hero-get:has(.hero-film) {
+    --action-gap: clamp(20px, 1.6vw, 26px);
+    display: grid;
+    gap: var(--action-gap);
+    width: min(100%, 220px);
+    padding-bottom: 12px;
+  }
+  .hero-get:has(.hero-film) .hero-actions { gap: var(--action-gap); }
+}
 @media (max-width: 740px) {
-  .hero-film { grid-template-columns: 85px 1fr; align-items: center; gap: 12px; }
-  .film-thumb { border-radius: 8px; }
+  .hero-get {
+    width: min(100%, 390px);
+    justify-self: center;
+  }
+  .hero-film {
+    width: min(100%, 264px);
+    min-height: 48px;
+    margin: 16px auto 0;
+    align-items: center;
+  }
+  .film-thumb, .film-caption { grid-area: 1 / 1; }
+  .film-thumb { width: 68px; justify-self: start; border-radius: 8px; }
   .film-thumb svg { width: 24px; height: 24px; }
-  .film-caption { justify-content: start; align-items: center; padding: 0; }
+  .film-caption {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .film-caption span { position: absolute; inset-inline-end: 8px; }
 }
