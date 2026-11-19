@@ -191,10 +191,14 @@ def check_window(executable, env):
             wait(lambda: len(clicks) > before, "reading window to receive the click")
         print("PASS  Top-centred native capsule and click-through below and beside it", flush=True)
 
-        # Main can publish the compact Win32 region before the renderer is ready
-        # to listen for mouse events. Exercise the real shortcut and observe both
-        # region changes before sending a single mouse entry to the ready UI.
+        # Enter exactly once as soon as the native strip exists. It must open
+        # even if the page has not attached its mouse listeners yet.
+        assert move(x, y)
+        wait(lambda: shape(False), "cold-start hover before any keyboard interaction")
         assert move(32, 100)
+        wait(lambda: shape(True), "collapse after cold-start hover")
+        print("PASS  First entry after startup, including a stationary pointer", flush=True)
+
         shortcut()
         opened = wait(lambda: shape(False), "renderer expansion via the global shortcut", timeout=35)
         shortcut()
