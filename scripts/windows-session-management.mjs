@@ -81,6 +81,28 @@ try {
     return sessions.some(s => s.id === second) && !sessions.some(s => s.id === first);
   });
   console.log('PASS  Installed Windows dashboard IPC: hide, restore, guarded deletion, persisted deletion and late-event suppression');
+  await evaluate("window.island.dashboard('integrations')");
+  await until(() => evaluate("!!document.querySelector('.more-agents .more-agent-trigger')"));
+  const agents = await evaluate(`(() => {
+    const list = document.querySelector('.more-agents');
+    const rows = [...list.querySelectorAll('[data-integration]')];
+    const setup = list.querySelector('.more-agent-setup');
+    return {
+      ids: rows.map(row => row.dataset.integration),
+      collapsed: rows.every(row => row.querySelector('.more-agent-trigger').getAttribute('aria-expanded') === 'false'),
+      hooksRow: setup?.closest('[data-integration]')?.dataset.integration,
+      independentSetup: !!setup && !setup.closest('.more-agent-trigger')
+    };
+  })()`);
+  assert.deepEqual(agents, {ids: ['qingyan', 'zhipu', 'doubao', 'grok'], collapsed:true, hooksRow:'zhipu', independentSetup:true});
+  const row = ".more-agents [data-integration=grok]";
+  const trigger = `document.querySelector('${row} .more-agent-trigger')`;
+  const visible = `!document.querySelector('${row} .more-agent-detail').hidden`;
+  await evaluate(`${trigger}.click()`);
+  await until(() => evaluate(visible));
+  await evaluate(`${trigger}.click()`);
+  await until(() => evaluate(`!(${visible})`));
+  console.log('PASS  Installed dashboard shows four compact agent rows, toggles details, and keeps hook setup independent');
 } finally {
   socket.close();
 }
