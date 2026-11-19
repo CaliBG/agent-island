@@ -39,7 +39,7 @@ def dll_function(lib, name, argtypes, restype):
     return fn
 
 
-def check_window(executable, env):
+def check_window(executable, env, minimized=True, opacity=None):
     user = ctypes.WinDLL("user32", use_last_error=True)
     gdi = ctypes.WinDLL("gdi32", use_last_error=True)
     hwnd, handle, cint, uint = wt.HWND, wt.HANDLE, ctypes.c_int, wt.UINT
@@ -64,6 +64,31 @@ def check_window(executable, env):
     click = dll_function(user, "mouse_event", [wt.DWORD] * 4 + [ctypes.c_size_t], None)
     key = dll_function(user, "keybd_event", [wt.BYTE, wt.BYTE, wt.DWORD, ctypes.c_size_t], None)
     dll_function(user, "SetThreadDpiAwarenessContext", [handle], handle)(ctypes.c_void_p(-4))
+    get_dc = dll_function(user, "GetDC", [hwnd], handle)
+    release_dc = dll_function(user, "ReleaseDC", [hwnd, handle], cint)
+    compatible_dc = dll_function(gdi, "CreateCompatibleDC", [handle], handle)
+    bitmap = dll_function(gdi, "CreateCompatibleBitmap", [handle,cint,cint], handle)
+    select = dll_function(gdi, "SelectObject", [handle,handle], handle)
+    blit = dll_function(gdi, "BitBlt", [handle,cint,cint,cint,cint,handle,cint,cint,wt.DWORD], wt.BOOL)
+    pixel = dll_function(gdi, "GetPixel", [handle,cint,cint], wt.DWORD)
+    delete_dc = dll_function(gdi, "DeleteDC", [handle], wt.BOOL)
+
+    def screen_colors(x, y, width=1, height=1):
+        desktop = get_dc(None)
+        memory = compatible_dc(desktop)
+        image = bitmap(desktop, width, height)
+        original = select(memory, image)
+        try:
+            # CAPTUREBLT includes the Electron layered window in the reading-window sample.
+            assert blit(memory, 0, 0, width, height, desktop, x, y, 0x40CC0020)
+            colors = [pixel(memory, col, row) for row in range(height) for col in range(width)]
+            assert 0xFFFFFFFF not in colors
+            return [tuple((color >> shift) & 255 for shift in (0, 8, 16)) for color in colors]
+        finally:
+            select(memory, original)
+            delete(image)
+            delete_dc(memory)
+            release_dc(None, desktop)
 
     def pid_of(win):
         pid = wt.DWORD()
@@ -93,6 +118,7 @@ def check_window(executable, env):
     move(32, 100)
     process = subprocess.Popen([executable, "--background"], env=env)
     island = None
+    compact_width, compact_height = (120,16) if opacity is not None else (64,6)
 
     def rect_values(r):
         return (r.left, r.top, r.right, r.bottom) if r is not None else None
@@ -137,7 +163,9 @@ def check_window(executable, env):
             if visible(win) and pid_of(win) == process.pid:
                 r = region(win)
                 scale = dpi(win) / 96
-                if r and scale > 0 and abs(r.right - r.left - 64 * scale) <= 1 and abs(r.bottom - r.top - 6 * scale) <= 1:
+                bounds = wt.RECT()
+                classic = not minimized and get_client_rect(win, byref(bounds)) and abs(bounds.right - 468*scale) <= 2
+                if classic or (minimized and r and scale > 0 and abs(r.right - r.left - compact_width * scale) <= 1 and abs(r.bottom - r.top - compact_height * scale) <= 1):
                     result.append(win)
             return True
         enum_windows(visit, 0)
@@ -154,12 +182,78 @@ def check_window(executable, env):
         for vk in reversed(sequence):
             key(vk, 0, 2, 0)
 
+    def verify_paint(samples, compact=True):
+        # Change only the window behind AISLAND. The difference between two
+        # framebuffer samples gives the actual compositor alpha, independent of
+        # the overlay's foreground color and content.
+        light, dark = 222, 32
+        until = time.monotonic() + 12
+        observations = {}
+        while time.monotonic() < until:
+            readings = []
+            for shade in (light, dark):
+                article.configure(background=("#%02x%02x%02x" % (shade,shade,shade)))
+                article.update()
+                time.sleep(.13)
+                readings.append([screen_colors(x,y)[0] for x,y,_ in samples])
+            good = True
+            for (x,y,expected), one, two in zip(samples, *readings):
+                alpha = [1-(a-b)/(light-dark) for a,b in zip(one,two)]
+                observations[(x,y)] = (one,two,[round(v,3) for v in alpha],expected)
+                good &= all(abs(v-expected)<.055 for v in alpha)
+            if good:
+                # A black full-size compact pill and a blue compact strip are
+                # mutually exclusive at this same centre pixel.
+                r,g,b = readings[1][0]
+                if compact:
+                    assert (b-r>120*opacity/100 if minimized else max(r,g,b)-min(r,g,b)<17), observations
+                print(f"PASS  Window compositor, {'strip' if minimized else 'classic island'}, {'compact' if compact else 'expanded'}, {opacity}%: {observations}", flush=True)
+                return
+        raise AssertionError(f"Unexpected actual screen alpha: {observations}")
+
     try:
-        island = wait(find_island, "visible top strip with a 64 by 6 DIP native region", timeout=40)
+        island = wait(find_island, "visible native island window", timeout=40)
         scale = dpi(island) / 96
         assert scale > 0, "Unable to read window DPI"
         window = wt.RECT()
         assert get_rect(island, byref(window))
+        centre = (window.left + window.right) // 2
+        def point(dx,dy):
+            return (centre+round(dx*scale), window.top+round(dy*scale))
+
+        if opacity is not None:
+            if minimized:
+                verify_paint([(*point(-25,8), opacity/100), (*point(42,8), opacity/100),
+                              (*point(-25,2),0), (*point(-25,14),0), (*point(20,8),0)])
+                # On the dark reading surface, the right badge has a neutral
+                # light wordmark as well as its darker rounded plate.
+                palette = screen_colors(*point(24,2),round(32*scale),round(12*scale))
+                light = sum(min(rgb)>32+100*opacity/100 for rgb in palette)
+                dark = sum(max(rgb)<56 for rgb in palette)
+                assert light >= 5 and dark >= 5, f"Missing compact wordmark pixels: {light=} {dark=}"
+            else:
+                verify_paint([(*point(0,3),opacity/100),(*point(50,12),opacity/100)])
+        if not minimized:
+            inside = (centre+round(55*scale), window.top+round(12*scale))
+            outside = (centre+round(145*scale), window.top+round(12*scale))
+            assert move(*outside)
+            wait(lambda: pid_of(from_point(wt.POINT(*outside))) == os.getpid(), "reading window beside classic pill")
+            before = len(clicks)
+            tap()
+            wait(lambda: len(clicks) > before, "reading window click beside classic pill")
+            assert move(*inside)
+            wait(lambda: pid_of(from_point(wt.POINT(*inside))) == process.pid, "classic pill to take cursor")
+            before = len(clicks)
+            tap()
+            # A click, with ordinary hover turned off, opens a panel that now
+            # accepts input below the previous 36-DIP compact footprint.
+            below = (centre, window.top+round(60*scale))
+            assert move(*below)
+            wait(lambda: pid_of(from_point(wt.POINT(*below))) == process.pid, "click expanded the classic island")
+            assert len(clicks) == before
+            verify_paint([(centre, window.top+round(45*scale), opacity/100)], compact=False)
+            print("PASS  Classic island opened by click; the adjacent reading window remains interactive", flush=True)
+            return
 
         def shape(compact):
             r = region(island)
@@ -167,7 +261,7 @@ def check_window(executable, env):
                 return False
             w, h = r.right - r.left, r.bottom - r.top
             if compact:
-                return r if abs(w - 64 * scale) <= 1 and abs(h - 6 * scale) <= 1 else None
+                return r if abs(w - compact_width * scale) <= 1 and abs(h - compact_height * scale) <= 1 else None
             client = wt.RECT()
             if not get_client_rect(island, byref(client)):
                 return None
@@ -175,7 +269,7 @@ def check_window(executable, env):
             full_width = client.right - client.left
             return r if 0 < full_width and full_width - 24 * scale <= w <= full_width + 1 and h > 60 * scale else None
 
-        r = wait(lambda: shape(True), "64 by 6 DIP collapsed native region")
+        r = wait(lambda: shape(True), "collapsed native region")
         x = window.left + (r.left + r.right) // 2
         y = window.top + (r.top + r.bottom) // 2
         assert window.top + r.top == 0, "Strip must touch the primary screen top"
@@ -183,9 +277,12 @@ def check_window(executable, env):
         assert pid_of(from_point(wt.POINT(x, y))) == process.pid, "Strip hit should belong to AISLAND"
         under_y = window.top + r.bottom + 1
         outer_x = window.left + r.right + 2
-        for point in [(x, under_y), (outer_x, y)]:
-            assert pid_of(from_point(wt.POINT(*point))) == os.getpid(), f"Reading window should own {point}"
-            assert move(*point)
+        outside_points = [(x, under_y), (outer_x, y)]
+        if opacity is not None:
+            outside_points.extend([point(-25,2),point(-25,14),point(20,8)])
+        for outside in outside_points:
+            assert pid_of(from_point(wt.POINT(*outside))) == os.getpid(), f"Reading window should own {outside}"
+            assert move(*outside)
             before = len(clicks)
             tap()
             wait(lambda: len(clicks) > before, "reading window to receive the click")
@@ -201,10 +298,19 @@ def check_window(executable, env):
 
         shortcut()
         opened = wait(lambda: shape(False), "renderer expansion via the global shortcut", timeout=35)
+        if opacity is not None:
+            assert opened.top == r.top, "Expanded floating panel must remain on its original anchor"
+            left, right = window.left + opened.left, window.left + opened.right
+            top, bottom = window.top + opened.top, window.top + opened.bottom
+            verify_paint([(centre, top+round(12*scale), opacity/100),
+                          (left+1, top+1, 0), (right-2, top+1, 0),
+                          (left+1, bottom-2, 0), (right-2, bottom-2, 0)], compact=False)
         shortcut()
         wait(lambda: shape(True), "renderer collapse via the global shortcut")
         print(f"PASS  Global shortcut opened {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
         assert pid_of(from_point(wt.POINT(32, 100))) == os.getpid(), "Pointer should start above the reading window"
+        if opacity is not None:
+            x,y=point(42,8)  # Both the blue rail and the logo must expand.
         assert move(x, y)
         wait(lambda: shape(False), "native hover expansion with ordinary hover disabled")
         before = len(clicks)
@@ -239,7 +345,15 @@ def main():
         subprocess.run([installer, "/S", "/currentuser", f"/D={install}"], check=True, timeout=150, env=env)
         executable, = list(install.rglob("Agent Island.exe"))
         print(f"PASS  Verified SHA-256 and installed {tag}", flush=True)
-        check_window(executable, env)
+        if tuple(map(int,tag[1:].split("."))) < (0,3,53):
+            check_window(executable, env)
+            return
+        for minimized, opacity in ((True,30), (False,30), (True,100), (False,100)):
+            profile = temp / f"profile-{minimized}-{opacity}"
+            profile.mkdir()
+            prefs = dict(settings, windowsMinimized=minimized, position="edge", opacity=opacity, compactWidth=260)
+            (profile / "state.json").write_text(json.dumps({"settings":prefs,"sessions":[]}), encoding="utf-8")
+            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity)
 
 
 if __name__ == "__main__":
