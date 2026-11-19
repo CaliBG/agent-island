@@ -23,4 +23,5 @@ jobs:
         shell: pwsh
         env:
           AISLAND_RELEASE_TAG: ${{ inputs.tag }}
+          AISLAND_RELEASE_READ_TOKEN: ${{ github.token }}
         run: python scripts/windows-installer-smoke.py

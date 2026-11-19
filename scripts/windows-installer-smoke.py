@@ -20,7 +20,11 @@ def installer_for(tag, directory):
         raise ValueError("Expected a desktop release tag such as v0.3.51")
     repo = "CaliBG/agent-island"
     filename = f"Agent-Island-{tag[1:]}-win-x64.exe"
-    with urllib.request.urlopen(f"https://api.github.com/repos/{repo}/releases/tags/{tag}", timeout=30) as response:
+    release_request = urllib.request.Request(f"https://api.github.com/repos/{repo}/releases/tags/{tag}")
+    token = os.environ.pop("AISLAND_RELEASE_READ_TOKEN", None)
+    if token:
+        release_request.add_unredirected_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(release_request, timeout=30) as response:
         release = json.load(response)
     asset = next(asset for asset in release["assets"] if asset["name"] == filename)
     path = directory / filename
