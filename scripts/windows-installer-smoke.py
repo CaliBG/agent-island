@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import socket
 import sys
 import tempfile
 import time
@@ -368,6 +369,23 @@ def check_observers(executable, profile, env):
             process.wait(timeout=10)
 
 
+def check_session_management(executable, profile, settings):
+    profile.mkdir()
+    (profile / "state.json").write_text(json.dumps({"settings":settings,"sessions":[]}), encoding="utf-8")
+    with socket.socket() as listener:
+        listener.bind(("127.0.0.1", 0))
+        port = listener.getsockname()[1]
+    process = subprocess.Popen([executable, "--dashboard", "--remote-debugging-address=127.0.0.1",
+                                f"--remote-debugging-port={port}"], env=dict(os.environ, AGENT_ISLAND_HOME=str(profile)))
+    try:
+        script = Path(__file__).with_name("windows-session-management.mjs")
+        subprocess.run(["node", "--experimental-websocket", script, profile, str(port), str(process.pid)], check=True, timeout=70)
+    finally:
+        if process.poll() is None:
+            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True)
+            process.wait(timeout=10)
+
+
 def main():
     tag = os.environ["AISLAND_RELEASE_TAG"]
     with tempfile.TemporaryDirectory(prefix="aisland-release-") as tmp:
@@ -384,6 +402,8 @@ def main():
         executable, = list(install.rglob("Agent Island.exe"))
         print(f"PASS  Verified SHA-256 and installed {tag}", flush=True)
         version = tuple(map(int,tag[1:].split(".")))
+        if version >= (0,3,57):
+            check_session_management(executable, temp / "session-management", settings)
         if version >= (0,3,56):
             check_observers(executable, home, env)
         if version < (0,3,53):

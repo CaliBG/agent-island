@@ -1,0 +1,86 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {setTimeout as pause} from 'node:timers/promises';
+
+const [profile, port, pid] = process.argv.slice(2);
+const debug = 'http://127.0.0.1:' + port;
+async function until(read) {
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    try { const value = await read(); if (value) return value; } catch {}
+    await pause(120);
+  }
+  throw Error('Isolated session-management fixture did not become ready');
+}
+
+const connection = await until(async () => {
+  const info = JSON.parse(await readFile(join(profile, 'connection.json'), 'utf8'));
+  return info.pid === Number(pid) && new URL(info.endpoint).hostname === '127.0.0.1' && info;
+});
+async function send(sessionId, event) {
+  const response = await fetch(connection.endpoint + '/v1/events', {
+    method: 'POST',
+    headers: {authorization:'Bearer ' + connection.token, 'content-type':'application/json'},
+    body:JSON.stringify({sessionId, event, agent:'Windows QA', conversationName:sessionId, content:'Installer acceptance test'})
+  });
+  assert.equal(response.status, 202);
+}
+const first = 'windows-qa:remove', second = 'windows-qa:keep';
+await send(first, 'task.start');
+await send(first, 'task.complete');
+await send(second, 'task.start');
+
+const page = await until(async () => (await (await fetch(debug + '/json/list')).json())
+  .find(p => p.type === 'page' && new URL(p.url).searchParams.get('window') === 'dashboard'));
+const socket = new WebSocket(page.webSocketDebuggerUrl);
+try {
+  await new Promise((resolve, reject) => {
+    socket.addEventListener('open', resolve, {once:true});
+    socket.addEventListener('error', reject, {once:true});
+  });
+  let sequence = 0;
+  async function evaluate(expression) {
+    const id = ++sequence;
+    const response = new Promise((resolve, reject) => {
+      const handler = ({data}) => {
+        const message = JSON.parse(data);
+        if (message.id !== id) return;
+        socket.removeEventListener('message', handler);
+        if (message.error || message.result?.exceptionDetails) reject(Error('Installed app failed session management evaluation: ' + JSON.stringify(message.error || message.result.exceptionDetails)));
+        else resolve(message.result.result.value);
+      };
+      socket.addEventListener('message', handler);
+    });
+    socket.send(JSON.stringify({id, method:'Runtime.evaluate', params:{expression, awaitPromise:true, returnByValue:true}}));
+    return response;
+  }
+  await until(() => evaluate("typeof window.island?.deleteSession === 'function'"));
+  const result = await evaluate(`(async () => {
+    const {getState, setIslandHidden, deleteSession, archive} = window.island;
+    const first = 'windows-qa:remove', second = 'windows-qa:keep';
+    const lookup = async id => (await getState()).sessions.find(s => s.id === id);
+    await setIslandHidden(first, true);
+    const hidden = (await lookup(first))?.islandHidden === true && !(await lookup(second))?.islandHidden;
+    await setIslandHidden(first, false);
+    const restored = (await lookup(first))?.islandHidden === false;
+    await archive(first);
+    const archived = (await lookup(first))?.archived === true;
+    await setIslandHidden(first, false);
+    const restoredArchived = archived && !(await lookup(first))?.archived && !(await lookup(first))?.islandHidden;
+    let protectedActive = false;
+    try { await deleteSession(second); } catch { protectedActive = true; }
+    await deleteSession(first);
+    return {hidden, restored, restoredArchived, protectedActive, removed:!(await lookup(first)), retained:!!(await lookup(second))};
+  })()`);
+  assert.deepEqual(result, {hidden:true, restored:true, restoredArchived:true, protectedActive:true, removed:true, retained:true});
+  await send(first, 'task.complete');
+  assert.equal(await evaluate("(async () => !(await window.island.getState()).sessions.some(s => s.id === 'windows-qa:remove'))()"), true);
+  await until(async () => {
+    const {sessions} = JSON.parse(await readFile(join(profile,'state.json'),'utf8'));
+    return sessions.some(s => s.id === second) && !sessions.some(s => s.id === first);
+  });
+  console.log('PASS  Installed Windows dashboard IPC: hide, restore, guarded deletion, persisted deletion and late-event suppression');
+} finally {
+  socket.close();
+}
