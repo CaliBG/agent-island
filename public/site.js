@@ -223,3 +223,24 @@ for (const island of document.querySelectorAll('.native-island')) {
     hold=setTimeout(()=>{hold=0;if(!island.matches(':hover, :focus-within'))setOpen(false);},3400);
   });
 }
+
+const filmLink = document.querySelector('.hero-film');
+const filmDialog = document.querySelector('#product-film');
+if (filmLink && filmDialog && typeof filmDialog.showModal === 'function') {
+  const film = filmDialog.querySelector('video');
+  filmLink.addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    filmDialog.showModal();
+    if (film.ended) film.currentTime = 0;
+    film.play().catch(() => {});
+  });
+  filmDialog.querySelector('.film-close').addEventListener('click', () => filmDialog.close());
+  filmDialog.addEventListener('click', event => {
+    if (event.target === filmDialog) filmDialog.close();
+  });
+  filmDialog.addEventListener('close', () => {
+    film.pause();
+    filmLink.focus({preventScroll: true});
+  });
+}
