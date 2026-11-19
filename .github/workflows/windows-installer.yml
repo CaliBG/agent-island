@@ -1,0 +1,26 @@
+name: Verify Windows installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published desktop release tag, e.g. v0.3.51
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Check the installed island on the Windows desktop
+        shell: pwsh
+        env:
+          AISLAND_RELEASE_TAG: ${{ inputs.tag }}
+        run: python scripts/windows-installer-smoke.py
