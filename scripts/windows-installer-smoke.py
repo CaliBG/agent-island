@@ -53,6 +53,11 @@ def check_window(executable, env):
     get_rgn = dll_function(user, "GetWindowRgn", [hwnd, handle], cint)
     rgn_box = dll_function(gdi, "GetRgnBox", [handle, ctypes.POINTER(wt.RECT)], cint)
     get_rect = dll_function(user, "GetWindowRect", [hwnd, ctypes.POINTER(wt.RECT)], wt.BOOL)
+    get_client_rect = dll_function(user, "GetClientRect", [hwnd, ctypes.POINTER(wt.RECT)], wt.BOOL)
+    get_title = dll_function(user, "GetWindowTextW", [hwnd, wt.LPWSTR, cint], cint)
+    get_class = dll_function(user, "GetClassNameW", [hwnd, wt.LPWSTR, cint], cint)
+    get_foreground = dll_function(user, "GetForegroundWindow", [], hwnd)
+    get_cursor = dll_function(user, "GetCursorPos", [ctypes.POINTER(wt.POINT)], wt.BOOL)
     from_point = dll_function(user, "WindowFromPoint", [wt.POINT], hwnd)
     dpi = dll_function(user, "GetDpiForWindow", [hwnd], uint)
     move = dll_function(user, "SetCursorPos", [cint, cint], wt.BOOL)
@@ -87,6 +92,31 @@ def check_window(executable, env):
     article.focus_force()
     move(32, 100)
     process = subprocess.Popen([executable, "--background"], env=env)
+    island = None
+
+    def rect_values(r):
+        return (r.left, r.top, r.right, r.bottom) if r is not None else None
+
+    def identify(win):
+        if not win:
+            return None
+        title, classname = ctypes.create_unicode_buffer(128), ctypes.create_unicode_buffer(128)
+        get_title(win, title, len(title))
+        get_class(win, classname, len(classname))
+        return {"hwnd": hex(win), "pid": pid_of(win), "class": classname.value, "title": title.value}
+
+    def observation():
+        cursor = wt.POINT()
+        has_cursor = get_cursor(byref(cursor))
+        bounds = wt.RECT()
+        return {
+            "appPid": process.pid, "island": identify(island), "dpi": dpi(island) if island else None,
+            "bounds": rect_values(bounds) if island and get_rect(island, byref(bounds)) else None,
+            "region": rect_values(region(island)) if island else None,
+            "cursor": (cursor.x, cursor.y) if has_cursor else None,
+            "hit": identify(from_point(cursor)) if has_cursor else None,
+            "foreground": identify(get_foreground()),
+        }
 
     def wait(check, description, timeout=15):
         until = time.monotonic() + timeout
@@ -98,14 +128,17 @@ def check_window(executable, env):
             if process.poll() is not None:
                 raise RuntimeError(f"Application exited ({process.returncode}) while waiting for {description}")
             time.sleep(0.025)
-        raise TimeoutError(description)
+        raise TimeoutError(f"{description}. Win32 observation: {json.dumps(observation(), ensure_ascii=True)}")
 
     def find_island():
         result = []
         @enum_proc
         def visit(win, _):
-            if visible(win) and pid_of(win) == process.pid and region(win) is not None:
-                result.append(win)
+            if visible(win) and pid_of(win) == process.pid:
+                r = region(win)
+                scale = dpi(win) / 96
+                if r and scale > 0 and abs(r.right - r.left - 64 * scale) <= 1 and abs(r.bottom - r.top - 6 * scale) <= 1:
+                    result.append(win)
             return True
         enum_windows(visit, 0)
         return result[0] if result else None
@@ -122,7 +155,7 @@ def check_window(executable, env):
             key(vk, 0, 2, 0)
 
     try:
-        island = wait(find_island, "visible native window with a shape", timeout=40)
+        island = wait(find_island, "visible top strip with a 64 by 6 DIP native region", timeout=40)
         scale = dpi(island) / 96
         assert scale > 0, "Unable to read window DPI"
         window = wt.RECT()
@@ -135,7 +168,12 @@ def check_window(executable, env):
             w, h = r.right - r.left, r.bottom - r.top
             if compact:
                 return r if abs(w - 64 * scale) <= 1 and abs(h - 6 * scale) <= 1 else None
-            return r if abs(w - 448 * scale) <= 2 and h > 60 * scale else None
+            client = wt.RECT()
+            if not get_client_rect(island, byref(client)):
+                return None
+            # The expanded surface fills the client area except its side insets.
+            full_width = client.right - client.left
+            return r if 0 < full_width and full_width - 24 * scale <= w <= full_width + 1 and h > 60 * scale else None
 
         r = wait(lambda: shape(True), "64 by 6 DIP collapsed native region")
         x = window.left + (r.left + r.right) // 2
@@ -153,6 +191,16 @@ def check_window(executable, env):
             wait(lambda: len(clicks) > before, "reading window to receive the click")
         print("PASS  Top-centred native capsule and click-through below and beside it", flush=True)
 
+        # Main can publish the compact Win32 region before the renderer is ready
+        # to listen for mouse events. Exercise the real shortcut and observe both
+        # region changes before sending a single mouse entry to the ready UI.
+        assert move(32, 100)
+        shortcut()
+        opened = wait(lambda: shape(False), "renderer expansion via the global shortcut", timeout=35)
+        shortcut()
+        wait(lambda: shape(True), "renderer collapse via the global shortcut")
+        print(f"PASS  Global shortcut opened {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
+        assert pid_of(from_point(wt.POINT(32, 100))) == os.getpid(), "Pointer should start above the reading window"
         assert move(x, y)
         wait(lambda: shape(False), "native hover expansion with ordinary hover disabled")
         before = len(clicks)
@@ -163,11 +211,6 @@ def check_window(executable, env):
         assert len(clicks) == before, "Click on the island leaked into the reading window"
         print("PASS  Hover, expansion, pointer ownership and collapse", flush=True)
 
-        shortcut()
-        wait(lambda: shape(False), "expansion via the global shortcut")
-        shortcut()
-        wait(lambda: shape(True), "collapse via the global shortcut")
-        print("PASS  Global keyboard shortcut", flush=True)
     finally:
         try:
             if process.poll() is None:
