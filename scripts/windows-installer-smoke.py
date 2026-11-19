@@ -39,7 +39,7 @@ def dll_function(lib, name, argtypes, restype):
     return fn
 
 
-def check_window(executable, env, minimized=True, opacity=None):
+def check_window(executable, env, minimized=True, opacity=None, expanded_opacity=None):
     user = ctypes.WinDLL("user32", use_last_error=True)
     gdi = ctypes.WinDLL("gdi32", use_last_error=True)
     hwnd, handle, cint, uint = wt.HWND, wt.HANDLE, ctypes.c_int, wt.UINT
@@ -207,7 +207,8 @@ def check_window(executable, env, minimized=True, opacity=None):
                 r,g,b = readings[1][0]
                 if compact:
                     assert (b-r>120*opacity/100 if minimized else max(r,g,b)-min(r,g,b)<17), observations
-                print(f"PASS  Window compositor, {'strip' if minimized else 'classic island'}, {'compact' if compact else 'expanded'}, {opacity}%: {observations}", flush=True)
+                percent = opacity if compact else expanded_opacity
+                print(f"PASS  Window compositor, {'strip' if minimized else 'classic island'}, {'compact' if compact else 'expanded'}, {percent}%: {observations}", flush=True)
                 return
         raise AssertionError(f"Unexpected actual screen alpha: {observations}")
 
@@ -251,7 +252,7 @@ def check_window(executable, env, minimized=True, opacity=None):
             assert move(*below)
             wait(lambda: pid_of(from_point(wt.POINT(*below))) == process.pid, "click expanded the classic island")
             assert len(clicks) == before
-            verify_paint([(centre, window.top+round(45*scale), opacity/100)], compact=False)
+            verify_paint([(centre, window.top+round(45*scale), expanded_opacity/100)], compact=False)
             print("PASS  Classic island opened by click; the adjacent reading window remains interactive", flush=True)
             return
 
@@ -302,7 +303,7 @@ def check_window(executable, env, minimized=True, opacity=None):
             assert opened.top == r.top, "Expanded floating panel must remain on its original anchor"
             left, right = window.left + opened.left, window.left + opened.right
             top, bottom = window.top + opened.top, window.top + opened.bottom
-            verify_paint([(centre, top+round(12*scale), opacity/100),
+            verify_paint([(centre, top+round(12*scale), expanded_opacity/100),
                           (left+1, top+1, 0), (right-2, top+1, 0),
                           (left+1, bottom-2, 0), (right-2, bottom-2, 0)], compact=False)
         shortcut()
@@ -345,15 +346,20 @@ def main():
         subprocess.run([installer, "/S", "/currentuser", f"/D={install}"], check=True, timeout=150, env=env)
         executable, = list(install.rglob("Agent Island.exe"))
         print(f"PASS  Verified SHA-256 and installed {tag}", flush=True)
-        if tuple(map(int,tag[1:].split("."))) < (0,3,53):
+        version = tuple(map(int,tag[1:].split(".")))
+        if version < (0,3,53):
             check_window(executable, env)
             return
         for minimized, opacity in ((True,30), (False,30), (True,100), (False,100)):
             profile = temp / f"profile-{minimized}-{opacity}"
             profile.mkdir()
             prefs = dict(settings, windowsMinimized=minimized, position="edge", opacity=opacity, compactWidth=260)
+            expanded_opacity = opacity
+            if version >= (0,3,54):
+                expanded_opacity = 100 if opacity == 30 else 30
+                prefs["expandedOpacity"] = expanded_opacity
             (profile / "state.json").write_text(json.dumps({"settings":prefs,"sessions":[]}), encoding="utf-8")
-            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity)
+            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity, expanded_opacity)
 
 
 if __name__ == "__main__":
