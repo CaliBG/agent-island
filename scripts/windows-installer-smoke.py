@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 import time
 import tkinter as tk
@@ -331,6 +332,42 @@ def check_window(executable, env, minimized=True, opacity=None, expanded_opacity
             article.destroy()
 
 
+def check_observers(executable, profile, env):
+    """Exercise the installed adapters against an isolated running desktop bridge."""
+    env = dict(env, COPILOT_HOME=str(profile / "copilot"), OPENCODE_CONFIG_DIR=str(profile / "opencode"))
+    installer = executable.parent / "resources" / "integrations" / "desktop-agents" / "install.py"
+    for name in ("opencode", "copilot"):
+        subprocess.run([sys.executable, installer, name], env=env, check=True, timeout=15)
+    process = subprocess.Popen([executable, "--background"], env=env)
+    try:
+        deadline = time.monotonic() + 40
+        while not (profile / "connection.json").exists():
+            if process.poll() is not None or time.monotonic() >= deadline:
+                raise RuntimeError("Desktop bridge failed to start")
+            time.sleep(0.1)
+        hooks = json.loads((profile / "copilot/hooks/aisland-observer.json").read_text(encoding="utf-8"))["hooks"]
+        hook = hooks["userPromptSubmitted"][0]
+        subprocess.run([hook["exec"], *hook["args"]], input=json.dumps({"sessionId":"windows-check", "cwd":str(profile)}),
+                       text=True, env={**env, **hook["env"]}, check=True, timeout=10)
+        plugin = profile / "opencode/plugins/aisland-observer.js"
+        (plugin.parent / "package.json").write_text('{"type":"module"}', encoding="utf-8")
+        probe = """
+            import {pathToFileURL} from 'node:url';
+            const {default: plugin} = await import(pathToFileURL(process.argv[1]));
+            const observer = await plugin.server({directory:process.cwd()});
+            await observer.event({event:{type:'session.status',properties:{sessionID:'windows-check',status:{type:'busy'}}}});
+        """
+        subprocess.run(["node", "--input-type=module", "-e", probe, str(plugin)], cwd=profile, check=True, timeout=15)
+        for name in ("opencode", "copilot"):
+            receipt = json.loads((profile / "integrations" / f"{name}-last-event.json").read_text(encoding="utf-8"))
+            assert receipt["sessionId"] == name + ":windows-check", receipt
+        print("PASS  Both packaged observers delivered scoped task events to the installed Windows bridge", flush=True)
+    finally:
+        if process.poll() is None:
+            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True)
+            process.wait(timeout=10)
+
+
 def main():
     tag = os.environ["AISLAND_RELEASE_TAG"]
     with tempfile.TemporaryDirectory(prefix="aisland-release-") as tmp:
@@ -347,6 +384,8 @@ def main():
         executable, = list(install.rglob("Agent Island.exe"))
         print(f"PASS  Verified SHA-256 and installed {tag}", flush=True)
         version = tuple(map(int,tag[1:].split(".")))
+        if version >= (0,3,56):
+            check_observers(executable, home, env)
         if version < (0,3,53):
             check_window(executable, env)
             return
