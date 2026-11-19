@@ -3,7 +3,9 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {setTimeout as pause} from 'node:timers/promises';
 
-const [profile, port, pid] = process.argv.slice(2);
+const [profile, port, pid, version = '0.3.59'] = process.argv.slice(2);
+const [major, minor, patch] = version.split('.').map(Number);
+const supportsPatch = minimum => major > 0 || minor > 3 || (minor === 3 && patch >= minimum);
 const debug = 'http://127.0.0.1:' + port;
 async function until(read) {
   const deadline = Date.now() + 30000;
@@ -81,28 +83,68 @@ try {
     return sessions.some(s => s.id === second) && !sessions.some(s => s.id === first);
   });
   console.log('PASS  Installed Windows dashboard IPC: hide, restore, guarded deletion, persisted deletion and late-event suppression');
-  await evaluate("window.island.dashboard('integrations')");
-  await until(() => evaluate("!!document.querySelector('.more-agents .more-agent-trigger')"));
-  const agents = await evaluate(`(() => {
-    const list = document.querySelector('.more-agents');
-    const rows = [...list.querySelectorAll('[data-integration]')];
-    const setup = list.querySelector('.more-agent-setup');
-    return {
-      ids: rows.map(row => row.dataset.integration),
-      collapsed: rows.every(row => row.querySelector('.more-agent-trigger').getAttribute('aria-expanded') === 'false'),
-      hooksRow: setup?.closest('[data-integration]')?.dataset.integration,
-      independentSetup: !!setup && !setup.closest('.more-agent-trigger')
-    };
-  })()`);
-  assert.deepEqual(agents, {ids: ['qingyan', 'zhipu', 'doubao', 'grok'], collapsed:true, hooksRow:'zhipu', independentSetup:true});
-  const row = ".more-agents [data-integration=grok]";
-  const trigger = `document.querySelector('${row} .more-agent-trigger')`;
-  const visible = `!document.querySelector('${row} .more-agent-detail').hidden`;
-  await evaluate(`${trigger}.click()`);
-  await until(() => evaluate(visible));
-  await evaluate(`${trigger}.click()`);
-  await until(() => evaluate(`!(${visible})`));
-  console.log('PASS  Installed dashboard shows four compact agent rows, toggles details, and keeps hook setup independent');
+  if (supportsPatch(58)) {
+    await evaluate("window.island.dashboard('integrations')");
+    await until(() => evaluate("!!document.querySelector('.more-agents .more-agent-trigger')"));
+    const agents = await evaluate(`(() => {
+      const list = document.querySelector('.more-agents');
+      const rows = [...list.querySelectorAll('[data-integration]')];
+      const setup = list.querySelector('.more-agent-setup');
+      return {
+        ids: rows.map(row => row.dataset.integration),
+        collapsed: rows.every(row => row.querySelector('.more-agent-trigger').getAttribute('aria-expanded') === 'false'),
+        hooksRow: setup?.closest('[data-integration]')?.dataset.integration,
+        independentSetup: !!setup && !setup.closest('.more-agent-trigger')
+      };
+    })()`);
+    assert.deepEqual(agents, {ids: ['qingyan', 'zhipu', 'doubao', 'grok'], collapsed:true, hooksRow:'zhipu', independentSetup:true});
+    const row = ".more-agents [data-integration=grok]";
+    const trigger = `document.querySelector('${row} .more-agent-trigger')`;
+    const visible = `!document.querySelector('${row} .more-agent-detail').hidden`;
+    await evaluate(`${trigger}.click()`);
+    await until(() => evaluate(visible));
+    await evaluate(`${trigger}.click()`);
+    await until(() => evaluate(`!(${visible})`));
+    console.log('PASS  Installed dashboard shows four compact agent rows, toggles details, and keeps hook setup independent');
+  }
+  if (supportsPatch(59)) {
+    const rebound = await evaluate(`(async () => {
+      const original = (await window.island.getState()).settings.shortcut;
+      const updated = await window.island.settings({shortcut:'Control+Alt+Shift+U'});
+      const saved = (await window.island.getState()).settings.shortcut;
+      let rejected = false;
+      try { await window.island.settings({shortcut:'CommandOrControl+C'}); } catch { rejected = true; }
+      const unchanged = (await window.island.getState()).settings.shortcut === saved;
+      const restored = await window.island.settings({shortcut:original});
+      return {
+        registered:updated.shortcutRegistered === true && saved.endsWith('+U'),
+        protected:rejected && unchanged,
+        restored:restored.shortcutRegistered === true && restored.settings.shortcut === original
+      };
+    })()`);
+    assert.deepEqual(rebound, {registered:true, protected:true, restored:true});
+    console.log('PASS  Installed settings register a custom shortcut, protect Copy, and restore the previous shortcut');
+    const occupied = process.env.AISLAND_QA_OCCUPIED_SHORTCUT;
+    if (occupied) {
+      const retained = await evaluate(`(async () => {
+        const original = (await window.island.getState()).settings.shortcut;
+        try { await window.island.settings({shortcut:${JSON.stringify(occupied)}}); }
+        catch {
+          const {shortcutRegistered, settings} = await window.island.getState();
+          return shortcutRegistered && settings.shortcut === original;
+        }
+        return false;
+      })()`);
+      assert.equal(retained, true);
+      console.log('PASS  A shortcut held by another Win32 process was rejected and the prior binding was retained');
+    }
+    // Leave a non-default binding for the next launch of this same test profile.
+    await evaluate("window.island.settings({shortcut:'Control+Alt+Shift+Y'})");
+    await until(async () => {
+      const state = JSON.parse(await readFile(join(profile, 'state.json'), 'utf8'));
+      return state.settings.shortcut.endsWith('+Y');
+    });
+  }
 } finally {
   socket.close();
 }

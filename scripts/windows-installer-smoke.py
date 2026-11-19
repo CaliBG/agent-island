@@ -41,7 +41,7 @@ def dll_function(lib, name, argtypes, restype):
     return fn
 
 
-def check_window(executable, env, minimized=True, opacity=None, expanded_opacity=None):
+def check_window(executable, env, minimized=True, opacity=None, expanded_opacity=None, custom_shortcut=False):
     user = ctypes.WinDLL("user32", use_last_error=True)
     gdi = ctypes.WinDLL("gdi32", use_last_error=True)
     hwnd, handle, cint, uint = wt.HWND, wt.HANDLE, ctypes.c_int, wt.UINT
@@ -178,7 +178,8 @@ def check_window(executable, env, minimized=True, opacity=None, expanded_opacity
         click(0x0004, 0, 0, 0, 0)
 
     def shortcut():
-        sequence = (0x11, 0x10, 0x20)  # Ctrl + Shift + Space
+        # Match the shortcut saved in this isolated Windows profile.
+        sequence = (0x11, 0x12, 0x10, ord("Y")) if custom_shortcut else (0x11, 0x10, 0x20)
         for vk in sequence:
             key(vk, 0, 0, 0)
         for vk in reversed(sequence):
@@ -310,7 +311,8 @@ def check_window(executable, env, minimized=True, opacity=None, expanded_opacity
                           (left+1, bottom-2, 0), (right-2, bottom-2, 0)], compact=False)
         shortcut()
         wait(lambda: shape(True), "renderer collapse via the global shortcut")
-        print(f"PASS  Global shortcut opened {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
+        binding = "Custom Ctrl+Alt+Shift+Y" if custom_shortcut else "Default Ctrl+Shift+Space"
+        print(f"PASS  {binding} opened {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
         assert pid_of(from_point(wt.POINT(32, 100))) == os.getpid(), "Pointer should start above the reading window"
         if opacity is not None:
             x,y=point(42,8)  # Both the blue rail and the logo must expand.
@@ -369,7 +371,7 @@ def check_observers(executable, profile, env):
             process.wait(timeout=10)
 
 
-def check_session_management(executable, profile, settings):
+def check_session_management(executable, profile, settings, version):
     profile.mkdir()
     (profile / "state.json").write_text(json.dumps({"settings":settings,"sessions":[]}), encoding="utf-8")
     with socket.socket() as listener:
@@ -377,10 +379,22 @@ def check_session_management(executable, profile, settings):
         port = listener.getsockname()[1]
     process = subprocess.Popen([executable, "--dashboard", "--remote-debugging-address=127.0.0.1",
                                 f"--remote-debugging-port={port}"], env=dict(os.environ, AGENT_ISLAND_HOME=str(profile)))
+    registered = False
     try:
+        probe_env = dict(os.environ)
+        if version >= (0,3,59):
+            # Claim an otherwise unused chord in a separate process using Win32.
+            user32 = ctypes.WinDLL("user32", use_last_error=True)
+            registered = user32.RegisterHotKey(None, 0x4153, 0x1 | 0x2 | 0x4, ord("J"))
+            if not registered:
+                raise ctypes.WinError(ctypes.get_last_error())
+            probe_env["AISLAND_QA_OCCUPIED_SHORTCUT"] = "Control+Alt+Shift+J"
         script = Path(__file__).with_name("windows-session-management.mjs")
-        subprocess.run(["node", "--experimental-websocket", script, profile, str(port), str(process.pid)], check=True, timeout=70)
+        subprocess.run(["node", "--experimental-websocket", script, profile, str(port), str(process.pid),
+                        ".".join(map(str, version))], check=True, timeout=70, env=probe_env)
     finally:
+        if registered:
+            user32.UnregisterHotKey(None, 0x4153)
         if process.poll() is None:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True)
             process.wait(timeout=10)
@@ -402,8 +416,10 @@ def main():
         executable, = list(install.rglob("Agent Island.exe"))
         print(f"PASS  Verified SHA-256 and installed {tag}", flush=True)
         version = tuple(map(int,tag[1:].split(".")))
+        dashboard_profile = temp / "session-management"
         if version >= (0,3,57):
-            check_session_management(executable, temp / "session-management", settings)
+            dashboard_settings = dict(settings, position="edge", opacity=30, compactWidth=260, expandedOpacity=100)
+            check_session_management(executable, dashboard_profile, dashboard_settings, version)
         if version >= (0,3,56):
             check_observers(executable, home, env)
         if version < (0,3,53):
@@ -411,14 +427,19 @@ def main():
             return
         for minimized, opacity in ((True,30), (False,30), (True,100), (False,100)):
             profile = temp / f"profile-{minimized}-{opacity}"
-            profile.mkdir()
             prefs = dict(settings, windowsMinimized=minimized, position="edge", opacity=opacity, compactWidth=260)
             expanded_opacity = opacity
             if version >= (0,3,54):
                 expanded_opacity = 100 if opacity == 30 else 30
                 prefs["expandedOpacity"] = expanded_opacity
-            (profile / "state.json").write_text(json.dumps({"settings":prefs,"sessions":[]}), encoding="utf-8")
-            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity, expanded_opacity)
+            custom_shortcut = version >= (0,3,59) and minimized and opacity == 30
+            if custom_shortcut:
+                # Relaunch the dashboard fixture with the key it saved through the public settings API.
+                profile = dashboard_profile
+            else:
+                profile.mkdir()
+                (profile / "state.json").write_text(json.dumps({"settings":prefs,"sessions":[]}), encoding="utf-8")
+            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity, expanded_opacity, custom_shortcut)
 
 
 if __name__ == "__main__":
