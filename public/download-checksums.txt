@@ -4,3 +4,4 @@
 d2094e6a28ce8d628f75469668975e3b49ffac7e198883eb0fb1f4aa8fb5e0c5  Agent-Island-Sync-0.2.0.zip
 5026c643b4f4e96b1b51fa8168ad39d0f942e925e8cc690797f7a51123554e7b  AISLAND-Mobile-0.2.7-android-build14.apk
 0f2dbe6fd7a7bb36e8942eb3f823e2f4c988d00595245f0ff8373da10c198334  AISLAND-Mobile-0.2.7-android.apk
+b986ce8eee1344f285369b2b7deff7a4322138fc5ad9bf9e92bd7699475ebcd0  AISLAND-Mobile-0.2.13-android.apk
