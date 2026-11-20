@@ -108,7 +108,7 @@ try {
     console.log('PASS  Installed dashboard shows four compact agent rows, toggles details, and keeps hook setup independent');
   }
   if (supportsPatch(69)) {
-    assert.equal(await evaluate("Object.hasOwn((await window.island.getState()).settings, 'shortcut')"), false);
+    assert.equal(await evaluate("window.island.getState().then(state => Object.hasOwn(state.settings, 'shortcut'))"), false);
   } else if (supportsPatch(59)) {
     const rebound = await evaluate(`(async () => {
       const original = (await window.island.getState()).settings.shortcut;
