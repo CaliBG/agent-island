@@ -45,7 +45,7 @@ def dll_function(lib, name, argtypes, restype):
     return fn
 
 
-def check_window(executable, env, minimized=True, opacity=None, expanded_opacity=None, custom_shortcut=False):
+def check_window(executable, env, minimized=True, opacity=None, expanded_opacity=None, custom_shortcut=False, has_shortcut=True):
     user = ctypes.WinDLL("user32", use_last_error=True)
     gdi = ctypes.WinDLL("gdi32", use_last_error=True)
     hwnd, handle, cint, uint = wt.HWND, wt.HANDLE, ctypes.c_int, wt.UINT
@@ -304,8 +304,11 @@ def check_window(executable, env, minimized=True, opacity=None, expanded_opacity
         wait(lambda: shape(True), "collapse after cold-start hover")
         print("PASS  First entry after startup, including a stationary pointer", flush=True)
 
-        shortcut()
-        opened = wait(lambda: shape(False), "renderer expansion via the global shortcut", timeout=35)
+        if has_shortcut:
+            shortcut()
+        else:
+            assert move(x, y)
+        opened = wait(lambda: shape(False), "renderer expansion", timeout=35)
         if opacity is not None:
             assert opened.top == r.top, "Expanded floating panel must remain on its original anchor"
             left, right = window.left + opened.left, window.left + opened.right
@@ -313,10 +316,12 @@ def check_window(executable, env, minimized=True, opacity=None, expanded_opacity
             verify_paint([(centre, top+round(12*scale), expanded_opacity/100),
                           (left+1, top+1, 0), (right-2, top+1, 0),
                           (left+1, bottom-2, 0), (right-2, bottom-2, 0)], compact=False)
-        shortcut()
-        wait(lambda: shape(True), "renderer collapse via the global shortcut")
-        binding = "Custom Ctrl+Alt+Shift+Y" if custom_shortcut else "Default Ctrl+Shift+Space"
-        print(f"PASS  {binding} opened {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
+        if has_shortcut:
+            shortcut()
+        else:
+            assert move(32, 100)
+        wait(lambda: shape(True), "renderer collapse")
+        print(f"PASS  Expanded to {opened.right-opened.left} x {opened.bottom-opened.top} px and collapsed", flush=True)
         assert pid_of(from_point(wt.POINT(32, 100))) == os.getpid(), "Pointer should start above the reading window"
         if opacity is not None:
             x,y=point(42,8)  # Both the blue rail and the logo must expand.
@@ -386,7 +391,7 @@ def check_session_management(executable, profile, settings, version):
     registered = False
     try:
         probe_env = dict(os.environ)
-        if version >= (0,3,59):
+        if (0,3,59) <= version < (0,3,69):
             # Claim an otherwise unused chord in a separate process using Win32.
             user32 = ctypes.WinDLL("user32", use_last_error=True)
             registered = user32.RegisterHotKey(None, 0x4153, 0x1 | 0x2 | 0x4, ord("J"))
@@ -436,14 +441,14 @@ def main():
             if version >= (0,3,54):
                 expanded_opacity = 100 if opacity == 30 else 30
                 prefs["expandedOpacity"] = expanded_opacity
-            custom_shortcut = version >= (0,3,59) and minimized and opacity == 30
+            custom_shortcut = (0,3,59) <= version < (0,3,69) and minimized and opacity == 30
             if custom_shortcut:
                 # Relaunch the dashboard fixture with the key it saved through the public settings API.
                 profile = dashboard_profile
             else:
                 profile.mkdir()
                 (profile / "state.json").write_text(json.dumps({"settings":prefs,"sessions":[]}), encoding="utf-8")
-            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity, expanded_opacity, custom_shortcut)
+            check_window(executable, dict(env, AGENT_ISLAND_HOME=str(profile)), minimized, opacity, expanded_opacity, custom_shortcut, has_shortcut=version < (0,3,69))
 
 
 if __name__ == "__main__":
