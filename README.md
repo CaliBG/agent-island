@@ -2,7 +2,8 @@
 
 白色与亮蓝色的中文官网、安装指引与通用 SDK 文档。
 
-- 官网：https://calibg.github.io/agent-island/
+- 官网：https://aisland.caliyang.cn/
+- GitHub Pages 兼容入口：https://calibg.github.io/agent-island/
 - 安装包：https://github.com/CaliBG/agent-island/releases
 - 静态 HTML/CSS/JavaScript，下载按钮使用 React、Tailwind CSS 与 Lucide。
 - 实际软件截图与 CSS 样机；没有虚构任务交互或追踪脚本。
@@ -19,7 +20,7 @@ npm run check
 npm run dev
 ```
 
-预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。
+预览：http://127.0.0.1:4173/agent-island/ 。修改 public/ 或 src/ 后重新构建。产物位于 dist/；推送 main 由 GitHub Actions 发布到 GitHub Pages。更新 `aisland.caliyang.cn` 时，在有 Cloudflare Pages 发布权限的开发机上运行 `./scripts/publish-custom-domain.sh`。它使用远端 main 已提交的内容构建并校验，保留手机配对等现有入口。
 
 按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。样机响应鼠标轻微移动。动态体验随自然滚动正反展开，并支持手动开合及系统减少动态效果偏好。三张产品截图卡随滚动依次叠放，支持键盘查看原图。品牌带可暂停，启用减少动态效果时显示静态清单。
 
