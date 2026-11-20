@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const supportEmail = 'yzs13968803946@qq.com';
+const supportEmail = 'support@caliyang.cn';
 const support = `<a href="mailto:${supportEmail}">${supportEmail}</a>`;
 
 const pages = [
