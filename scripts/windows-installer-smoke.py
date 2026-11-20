@@ -387,7 +387,9 @@ def check_session_management(executable, profile, settings, version):
         listener.bind(("127.0.0.1", 0))
         port = listener.getsockname()[1]
     process = subprocess.Popen([executable, "--dashboard", "--remote-debugging-address=127.0.0.1",
-                                f"--remote-debugging-port={port}"], env=dict(os.environ, AGENT_ISLAND_HOME=str(profile)))
+                                f"--remote-debugging-port={port}"], env=dict(os.environ, AGENT_ISLAND_HOME=str(profile),
+                                ELECTRON_ENABLE_LOGGING="1", ELECTRON_ENABLE_STACK_DUMPING="1",
+                                ELECTRON_LOG_FILE=str(profile / "startup.log")))
     registered = False
     try:
         probe_env = dict(os.environ)
@@ -401,6 +403,20 @@ def check_session_management(executable, profile, settings, version):
         script = Path(__file__).with_name("windows-session-management.mjs")
         subprocess.run(["node", "--experimental-websocket", script, profile, str(port), str(process.pid),
                         ".".join(map(str, version))], check=True, timeout=70, env=probe_env)
+    except Exception:
+        # Electron reports early main-process import errors in a native dialog, before the local bridge exists.
+        print(f"Dashboard exit code: {process.poll()}; profile files: {[p.name for p in profile.iterdir()]}", flush=True)
+        log = profile / "startup.log"
+        if log.exists():
+            print(log.read_text(encoding="utf-8", errors="replace")[-3500:], flush=True)
+        subprocess.run(["powershell", "-NoProfile", "-Command",
+                        "Add-Type -AssemblyName UIAutomationClient; "
+                        f"$condition = [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, [int]{process.pid}); "
+                        "$windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children, $condition); "
+                        "foreach ($w in $windows) { Write-Host $w.Current.Name; if ($w.Current.ClassName -eq '#32770') { "
+                        "$w.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition) | "
+                        "ForEach-Object { Write-Host $_.Current.Name } } }"], timeout=15, check=False)
+        raise
     finally:
         if registered:
             user32.UnregisterHotKey(None, 0x4153)
