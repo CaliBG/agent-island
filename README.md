@@ -24,7 +24,22 @@ npm run dev
 
 按钮源文件：src/components/ui/interactive-hover-button.tsx。支持链接/按钮、自定义 className、children 和 fullWidth；普通 HTML 链接提供无 JavaScript 回退。样机响应鼠标轻微移动。动态体验随自然滚动正反展开，并支持手动开合及系统减少动态效果偏好。三张产品截图卡随滚动依次叠放，支持键盘查看原图。品牌带可暂停，启用减少动态效果时显示静态清单。
 
-## 更新版本
+## Creem 收款和交付
+
+默认运行 `npm run build` 会发布免费的预览版下载入口。启动收费构建时，在终端运行下面的命令并粘贴 Creem 正式模式中 AISLAND 早鸟商品的付款链接或商品 ID。这个值是公开的商品标识，无需 API 密钥。
+
+```sh
+read -r checkout
+AISLAND_CREEM_LIVE_CHECKOUT="$checkout" npm run build
+npm run check
+npm run dev
+```
+
+正式商品的分享链接使用 `https://www.creem.io/product/prod_…`。请从正式商品的分享入口复制，完整保留商品标识。构建会拒绝测试链接和当前沙盒商品 ID。商品 ID 本身没有环境标识，发布人员应在 Creem 正式模式核对商品、10 美元一次性价格和交付文件。每次更换正式商品附件时，将已上传安装包的 SHA-256 同步到 `scripts/paid-download-checksums.txt`，收费构建会发布这些版本供客户端检查更新。买家从收据或官网的 My downloads 用付款邮箱进入 Creem 订单，在 Files 中取回购买文件。
+
+GitHub Pages 从仓库变量 `AISLAND_CREEM_LIVE_CHECKOUT` 读取相同的值。自有域名的发布脚本继承运行时同名环境变量。两处均留空时，沿用公开预览。发布付费版本前，先在正式商品上确认私有交付和已购买用户的更新方式。修改网站按钮不会撤回 GitHub Releases 上已公开的安装包。
+
+## 更新公开预览版本
 
 1. 构建并测试安装包，将二进制与 SHA256SUMS.txt 上传 GitHub Release。
 2. 确认服务器文件摘要，发布 Release。

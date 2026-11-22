@@ -1,20 +1,22 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { ordersUrl, sandboxProduct } from './creem-store.mjs';
 
 const supportEmail = 'support@caliyang.cn';
 const support = `<a href="mailto:${supportEmail}">${supportEmail}</a>`;
 
-const pages = [
+const storePages = checkout => [
   {
     path: 'pricing',
     title: 'Pricing & support',
     description: 'AISLAND early-bird pricing, delivery and customer support.',
     body: `<h2>Early bird · $10 USD</h2>
       <p>Buy AISLAND once for Mac, Windows and Android. All future AISLAND updates are included.</p>
-      <p>The current preview is free. Paid access opens after store approval.</p>
-      <p><a href="../#download">Download the free preview ↗</a></p>
+      ${checkout ? `<p><a href="${checkout}">Buy lifetime access · $10 ↗</a></p>` : `<p>The current preview is free. Paid access opens after store approval.</p>
+      <p><a href="../#download">Download the free preview ↗</a></p>`}
       <h2>How delivery works</h2>
-      <p>At launch, Creem will process your payment as the merchant of record. Open the order link in your receipt email to download the installers. The checkout shows the final total and the payment methods available to you.</p>
-      <details><summary>Try the test checkout</summary><p>This sandbox order uses test payment details and delivers a sample ZIP. No money is collected. <a href="https://www.creem.io/test/payment/prod_7SLLY1St8SpVLXLvvjizEj" rel="nofollow">Open Creem test checkout ↗</a></p></details>
+      ${checkout ? `<p>Creem processes your purchase. Checkout shows your final total and available payment methods. Open the order in your receipt email to download AISLAND for Apple silicon Macs or Windows x64. On first launch, enter your purchase email and the activation code sent to it. To return later, <a href="${ordersUrl}">sign in to your Creem orders</a> using the email you used at checkout.</p>` : `<p>At launch, Creem will process your payment as the merchant of record. Open the order link in your receipt email to download the installers. The checkout shows the final total and the payment methods available to you.</p>
+      <details><summary>Try the test checkout</summary><p>This sandbox order uses test payment details and delivers a sample ZIP. No money is collected. <a href="https://www.creem.io/test/payment/${sandboxProduct}" rel="nofollow">Open Creem test checkout ↗</a></p></details>`}
       <h2 id="contact">Contact support</h2>
       <p>For installation help, order questions or feedback, email ${support}. For help with a purchase, include your order number.</p>`,
   },
@@ -28,6 +30,7 @@ const pages = [
       <p>If you enable phone sync, your paired devices encrypt task summaries and instructions before sending them through the relay. The relay uses connection identifiers to deliver them. Each connected agent also operates under its own privacy policy.</p>
       <h2>Website and orders</h2>
       <p>Our website hosts receive the network information needed to serve pages and downloads, including your IP address. Creem processes checkout information, including the buyer email, payment details and order information. We use purchase records to deliver downloads, help with receipts and resolve refund requests. <a href="https://www.creem.io/privacy">Creem’s privacy policy</a>.</p>
+      ${checkout ? '<h2>Desktop activation</h2><p>When you request activation, our Cloudflare service checks your purchase with Creem and uses Resend to email you a one-time code. The service associates a device credential with your order to restore access and check refunds. The desktop app stores a signed receipt so you can work offline.</p>' : ''}
       <h2>Contact and requests</h2>
       <p>We use your email address and the information you send to handle your request. If you choose to support the project and request follow-up, we use your email to thank you and invite feedback. You can ask us to stop contacting you, or ask about access, correction or deletion of your information, at ${support}. We may need to keep transaction records required by law.</p>`,
   },
@@ -38,9 +41,9 @@ const pages = [
     body: `<h2>Using AISLAND</h2>
       <p>AISLAND displays progress for connected agents and lets you continue supported tasks. Use it with devices, agents and accounts you are authorized to control. Agent subscriptions and third-party services are managed separately.</p>
       <h2>Early-bird access</h2>
-      <p>The early-bird offer is a one-time purchase of $10 USD and includes all future AISLAND updates. Check the <a href="../docs/#install">installation guide</a> for supported platforms and requirements. The currently published preview is free.</p>
+      <p>The early-bird offer is a one-time purchase of $10 USD and includes all future AISLAND updates. Check the <a href="../docs/#install">installation guide</a> for supported platforms and requirements. ${checkout ? `Download the installers from <a href="${ordersUrl}">your Creem order</a>.` : 'The currently published preview is free.'}</p>
       <h2>Payments and delivery</h2>
-      <p>When sales open, Creem will process purchases as the merchant of record. Your receipt email provides access to your order and downloads. The <a href="https://www.creem.io/buyer-terms">Creem buyer terms</a> and our <a href="../refunds/">refund policy</a> apply to purchases.</p>
+      <p>${checkout ? 'Creem processes purchases' : 'When sales open, Creem will process purchases'} as the merchant of record. Your receipt email provides access to your order and downloads. The <a href="https://www.creem.io/buyer-terms">Creem buyer terms</a> and our <a href="../refunds/">refund policy</a> apply to purchases.</p>
       <h2>Questions</h2><p>For product or order support, contact ${support}.</p>`,
   },
   {
@@ -56,7 +59,8 @@ const pages = [
   },
 ];
 
-export async function writeStorePages() {
+export async function writeStorePages(directory, checkout) {
+  const pages = storePages(checkout);
   for (const page of pages) {
     const nav = pages.map(({ path, title }) =>
       `<a href="../${path}/"${path === page.path ? ' aria-current="page"' : ''}>${title}</a>`
@@ -79,7 +83,7 @@ export async function writeStorePages() {
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="header"><div class="header-inner container">
     <a class="brand" href="../"><img src="../assets/wordmark.svg" width="138" height="29" alt="AISLAND home"></a>
-    <a class="nav-download" href="../#download">Download preview ↗</a>
+    <a class="nav-download" href="../#download">${checkout ? 'Get AISLAND' : 'Download preview'} ↗</a>
   </div></header>
   <div class="container docs-layout">
     <nav class="docs-sidebar" aria-label="Customer information">${nav}</nav>
@@ -87,7 +91,7 @@ export async function writeStorePages() {
   </div>
 </body>
 </html>\n`;
-    await mkdir(`dist/${page.path}`, { recursive: true });
-    await writeFile(`dist/${page.path}/index.html`, html);
+    await mkdir(join(directory, page.path), { recursive: true });
+    await writeFile(join(directory, page.path, 'index.html'), html);
   }
 }

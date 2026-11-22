@@ -1,5 +1,7 @@
 import {chromium} from '../../desktop-app/node_modules/playwright/index.mjs';
 import assert from 'node:assert/strict';
+import { liveCheckout } from './creem-store.mjs';
+const checkout = liveCheckout(process.env.AISLAND_CREEM_LIVE_CHECKOUT);
 const base = process.env.SITE_URL || 'http://127.0.0.1:4173/agent-island/';
 const browser = await chromium.launch({channel:'chrome'});
 const errors = [];
@@ -7,7 +9,7 @@ try {
   const page = await browser.newPage({viewport:{width:1440,height:960}});
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base,{waitUntil:'networkidle'});
-  assert.equal(await page.locator('.interactive-hover-button').count(),4);
+  assert.equal(await page.locator('.interactive-hover-button').count(),checkout ? 3 : 4);
   assert.equal(await page.locator('.product-card').count(),3);
   assert.equal(await page.locator('.product-zoom,.brand-band-toggle,.converge-all').count(),0);
   const stream=page.locator('#brand-stream');
@@ -57,7 +59,7 @@ try {
   await card.scrollIntoViewIfNeeded();
   assert.equal(await card.evaluate(el=>getComputedStyle(el).position),'sticky');
   await page.locator('.phone-zoom').click(); await page.locator('.image-dialog[open]').waitFor();await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#download a[href$=".exe"]').count(),1);
+  assert.equal(await page.locator(checkout ? `#download a[href="${checkout}"]` : '#download a[href$=".exe"]').count(),1);
   for(const width of [320,390,768,1024,1440]){
     await page.setViewportSize({width,height:844});
     await page.evaluate(() => {
@@ -84,7 +86,7 @@ try {
   }
   const plain=await browser.newPage({javaScriptEnabled:false});
   await plain.goto(base);
-  assert(await plain.getByRole('link',{name:'Download for Mac',exact:true}).isVisible());
+  assert(await plain.getByRole('link',{name:checkout ? 'Get AISLAND · $10' : 'Download for Mac',exact:true}).isVisible());
   assert.deepEqual(errors,[]);
   console.log('PASS: device fit at five widths, camera and native proportions, scroll reveal, live branches, continuous logo flights, accessible downloads, English routes and reduced motion.');
 } finally {await browser.close();}

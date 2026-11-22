@@ -3,6 +3,13 @@ set -euo pipefail
 
 # Publish the same committed source as GitHub Pages, even when local edits are pending.
 cd "$(git rev-parse --show-toplevel)"
+# Use the same public checkout setting as the GitHub Pages workflow.
+# Stop if the setting cannot be read, so a deployment cannot reopen preview downloads.
+if [[ -z "${AISLAND_CREEM_LIVE_CHECKOUT:-}" ]]; then
+  AISLAND_CREEM_LIVE_CHECKOUT="$(gh variable get AISLAND_CREEM_LIVE_CHECKOUT)"
+fi
+: "${AISLAND_CREEM_LIVE_CHECKOUT:?Missing production checkout}"
+export AISLAND_CREEM_LIVE_CHECKOUT
 git fetch origin main
 source_commit="$(git rev-parse origin/main)"
 stage="$(mktemp -d)"

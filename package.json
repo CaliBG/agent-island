@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs && vite build",
     "dev": "node scripts/serve.mjs",
-    "check": "tsc --noEmit && node scripts/check.mjs"
+    "check": "tsc --noEmit && node scripts/check.mjs && node --test scripts/creem-store.test.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
