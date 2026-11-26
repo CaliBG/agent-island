@@ -2,7 +2,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 const root = resolve('dist');
-for (const path of ['index.html','docs/index.html','pricing/index.html','privacy/index.html','terms/index.html','refunds/index.html']) {
+for (const path of ['index.html','docs/index.html','updates/index.html','pricing/index.html','privacy/index.html','terms/index.html','refunds/index.html']) {
   const file = resolve(root,path), html = await readFile(file,'utf8');
   assert.match(html, /<html lang="en">/);
   assert.match(html, /<meta\b[^>]*\bname="description"/);

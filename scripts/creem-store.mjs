@@ -27,7 +27,7 @@ export async function buildStorefront(directory, checkout, storeId = '') {
     hero: `<div class="hero-actions"><span data-hover-button data-variant="light"><a class="button-fallback" href="${checkout}">Get AISLAND · $10</a></span><span data-hover-button><a class="button-fallback secondary" href="${ordersUrl}">My downloads</a></span></div>`,
     downloads: `<div class="desktop-downloads">
           <article class="download-row"><img src="./assets/icon.svg" width="26" height="26" alt=""><div><h3>Lifetime access</h3><p>Mac, Windows and Android. Pay once for all future updates.</p></div><span data-hover-button data-variant="light"><a class="button-fallback" href="${checkout}">Buy AISLAND · $10</a></span></article>
-          <nav class="download-help" aria-label="Customer links"><a href="./docs/#install">Installation guide</a><a href="./pricing/#contact">Order support</a></nav>
+          <nav class="download-help" aria-label="Customer links"><a href="./docs/#install">Installation guide</a><a href="./updates/">Release notes</a><a href="./pricing/#contact">Order support</a></nav>
         </div>
         <aside class="mobile-download"><h3>Already purchased?</h3><div class="mobile-links"><a href="${ordersUrl}">Open my Creem order <span aria-hidden="true">↗</span></a><a href="./mobile/">Open mobile web <span aria-hidden="true">↗</span></a></div></aside>`,
     docsIntro: `After <a href="${checkout}">purchasing lifetime access</a>, open the order in your Creem receipt email and download the file for your platform.`,
