@@ -1,0 +1,48 @@
+#download .download-heading {margin-bottom:clamp(22px,3vw,36px)}
+#download .download-layout:has(.access-panel) {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.access-panel {
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:8px;
+  padding:clamp(20px,2.6vw,34px);
+  border-radius:20px;
+  background:#1a1d24;
+}
+.access-panel h3,.journal-heading h3,.journal-copy h4 {margin:0;line-height:1.18;letter-spacing:-.035em}
+.access-panel h3 {font-size:clamp(21px,2vw,28px);font-weight:580}
+.access-panel p {max-width:46ch;color:#bbc2ce;font-size:15px;line-height:1.55}
+.access-actions,.access-help {display:flex;align-items:center;flex-wrap:wrap;gap:8px 20px}
+.access-actions {margin-top:13px}
+.access-actions [data-hover-button] {display:inline-flex}
+.access-help a,.journal-heading a {color:#a5c3ff;font-size:14px}
+.access-help a:hover,.journal-heading a:hover {text-decoration:underline}
+.access-help {grid-column:1/-1;padding-block:4px;gap:4px 22px}
+.access-help a,.journal-heading a {display:inline-flex;align-items:center;min-height:36px}
+.release-journal {margin-top:clamp(44px,6vw,84px)}
+.journal-heading {display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:18px}
+.journal-heading h3 {font-size:clamp(28px,3.4vw,44px);font-weight:590}
+.journal-heading a {gap:.3em}
+.journal-entry {
+  display:grid;
+  grid-template-columns:minmax(180px,.7fr) minmax(0,2fr);
+  gap:clamp(20px,4vw,60px);
+  padding:clamp(24px,3vw,38px) 0;
+  border-top:1px solid #343841;
+}
+.journal-meta {display:flex;flex-direction:column;gap:4px;align-items:flex-start;font-variant-numeric:tabular-nums}
+.journal-meta time {font-size:16px;font-weight:600}
+.journal-meta span {font-size:13px;color:#a8b3c4}
+.journal-copy {max-width:70ch}
+.journal-copy h4 {font-size:clamp(20px,2.1vw,28px);font-weight:570}
+.journal-copy ul {margin:12px 0 0;padding-inline-start:1.05em;list-style:disc;color:#c1c8d3;font-size:15px;line-height:1.6}
+.journal-copy li+li {margin-top:7px}
+.journal-copy li::marker {color:#7997c9}
+@media (max-width:700px) {
+  #download .download-layout:has(.access-panel),.journal-entry {grid-template-columns:1fr}
+  .journal-entry {gap:13px}
+  .journal-meta {flex-direction:row;align-items:baseline;flex-wrap:wrap;gap:3px 12px}
+}
